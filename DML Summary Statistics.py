@@ -11,6 +11,7 @@ df = pd.read_stata(
     r"C:/Users/Will/OneDrive - The Ohio State University/RA/Data/DML Cleaned Data.dta"
 )
 
+
 #aligning dataset with the DML dataset
 #df = df.dropna(subset=["w_farm_size_agland"])
 
@@ -110,7 +111,6 @@ def quartile_summary_table(
         # Quartile means
         if v == "farming_loan_total_amount":
             means = data.loc[data["any_arv_farm_loan"] == 1].groupby(q, observed=True)[v].mean()
-            n_total = int(data.loc[data["any_arv_farm_loan"] == 1, v].notna().sum())
         else:
             means = data.groupby(q, observed=True)[v].mean()
             n_total = int(data[v].notna().sum())
