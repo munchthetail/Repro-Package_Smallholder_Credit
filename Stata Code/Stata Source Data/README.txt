@@ -1,0 +1,1 @@
+This is the location that raw data should be placed from https://github.com/EvansSchoolPolicyAnalysisAndResearch/LSMS-Data-Dissemination/tree/main/Nigeria%20GHS
