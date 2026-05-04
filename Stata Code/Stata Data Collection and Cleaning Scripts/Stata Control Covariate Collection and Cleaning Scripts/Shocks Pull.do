@@ -9,7 +9,7 @@
 	set more off   // prevents output from pausing with "more"
 
 	//wave 5
-		use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect12_harvestw5.dta", clear
+		use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect12_harvestw5.dta", clear
 			
 			//classifying shocks into four broad categories
 			gen byte food_shock = inlist(shock_cd, 1, 2, 3, 4, 5, 6, 7, 8, 16, 22, 24)
@@ -36,7 +36,7 @@
 			save `shock_w5'
 			
 	//wave 4
-		use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect15a_harvestw4.dta", clear
+		use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect15a_harvestw4.dta", clear
 			keep hhid shock_cd s15aq1 s15aq2 s15aq3a s15aq3b s15aq3c
 			rename (s15aq1 s15aq2 s15aq3a s15aq3b s15aq3c) (been_shocked shock_frequency year_2017 year_2018 year_2019)
 			

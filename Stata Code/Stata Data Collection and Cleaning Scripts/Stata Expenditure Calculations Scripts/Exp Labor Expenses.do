@@ -9,7 +9,7 @@
 		//agricultural survey
 			//labor expensitures 
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect11c1b_plantingw5.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect11c1b_plantingw5.dta", clear
 				keep if s11c1q2_1 == 1
 				keep hhid plotid s11c1q3_1 s11c1q4_1 s11c1q6_1
 				rename (s11c1q3_1 s11c1q4_1 s11c1q6_1) (number_hired ave_days_hired ave_cost_per_worker_per_day)
@@ -28,7 +28,7 @@
 			//agricultural survey
 				//input expenses - animal rental cost
 				//annual
-				use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/secta11c2_harvestw5.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/secta11c2_harvestw5.dta", clear
 					keep hhid plotid s11c2q17 s11c2q18
 					rename (s11c2q17 s11c2q18) (animal_rent animal_feed)
 					egen animal_labor = rowtotal(animal_rent animal_feed)
@@ -42,7 +42,7 @@
 						
 				//labor expensitures - PREHARVEST
 				//annual
-				use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/secta2b_harvestw5.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/secta2b_harvestw5.dta", clear
 					keep if sa2bq1_1 == 1
 					keep hhid plotid sa2bq2_1 sa2bq3_1 sa2bq5_1
 					rename (sa2bq2_1 sa2bq3_1 sa2bq5_1) (number_hired ave_days_hired ave_cost_per_worker_per_day)
@@ -67,7 +67,7 @@
 		//agricultural survey
 			//labor expensitures 
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect11c1b_plantingw4.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect11c1b_plantingw4.dta", clear
 				keep if s11c1q2a == 1
 				keep hhid plotid s11c1q2 s11c1q3 s11c1q4
 				rename (s11c1q2 s11c1q3 s11c1q4) (number_hired ave_days_hired ave_cost_per_worker_per_day)
@@ -86,7 +86,7 @@
 		//agricultural survey	
 			//input expenses - animal rental cost
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/secta11c2_harvestw4.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/secta11c2_harvestw4.dta", clear
 				keep hhid plotid s11c2q23 s11c2q25
 				rename (s11c2q23 s11c2q25) (animal_rent animal_feed)
 				egen animal_labor = rowtotal(animal_rent animal_feed)
@@ -100,7 +100,7 @@
 				
 			//labor expensitures
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/secta2b_harvestw4.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/secta2b_harvestw4.dta", clear
 				keep if sa2bq2a == 1
 				keep hhid plotid sa2bq2 sa2bq3 sa2bq4
 				rename (sa2bq2 sa2bq3 sa2bq4) (number_hired ave_days_hired ave_cost_per_worker_per_day)

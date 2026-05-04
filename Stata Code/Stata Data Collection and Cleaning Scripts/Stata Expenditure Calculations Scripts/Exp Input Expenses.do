@@ -8,7 +8,7 @@
 		//agricultural survey
 			//seed expenditures --- purchase of seeds expenses
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect11e1_plantingw5.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect11e1_plantingw5.dta", clear
 				keep hhid s11eq11
 				rename s11eq11 item_expenditure
 				
@@ -21,7 +21,7 @@
 					
 			//seed expenditures --- transportation expenses for seeds aquisition
 			//annual
-				use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect11e2_plantingw5.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect11e2_plantingw5.dta", clear
 					keep hhid s11eq16 s11eq17
 					egen item_expenditure = rowtotal(s11eq16 s11eq17)
 					
@@ -43,7 +43,7 @@
 			//agricultural survey
 				//input expenditures namely fertilizer and machinery purchase  --- transportation expenses
 				//annual
-					use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/secta11c3q12_harvestw5.dta", clear			
+					use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/secta11c3q12_harvestw5.dta", clear			
 						keep hhid s11c3q12
 						rename s11c3q12 fert_pest_mach_transport_exp
 						
@@ -56,7 +56,7 @@
 				
 				//input expenditures namely fertilizer and machinery purchase
 				//annual
-					use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/secta11c3_harvestw5.dta", clear
+					use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/secta11c3_harvestw5.dta", clear
 						keep hhid inputid s11c3q5 s11c3q11
 						rename (s11c3q5 s11c3q11) (input_purchase input_rent)
 						
@@ -80,7 +80,7 @@
 		//agricultural survey
 			//seed expenditures --- purchase of seeds expenses
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect11e1_plantingw4.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect11e1_plantingw4.dta", clear
 				keep hhid s11eq21
 				rename s11eq21 item_expenditure
 				
@@ -93,7 +93,7 @@
 			
 			//seed expenditures --- transportation expenses for seeds aquisition
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect11e2_plantingw4.dta", clear
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect11e2_plantingw4.dta", clear
 				keep hhid s11eq12 s11eq19
 				egen item_expenditure = rowtotal(s11eq12 s11eq19)
 				
@@ -115,7 +115,7 @@
 		//agricultural survey
 			//input expenditures namely fertilizer and machinery purchase  --- transportation expenses
 			//annual
-			use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/secta11c3q12_harvestw4.dta", clear			
+			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/secta11c3q12_harvestw4.dta", clear			
 				keep hhid s11c3q12
 				rename s11c3q12 fert_pest_mach_transport_exp
 				
@@ -128,7 +128,7 @@
 				
 			//input expenditures namely fertilizer and machinery purchase
 			//annual
-				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/secta11c3_harvestw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/secta11c3_harvestw4.dta", clear
 					keep hhid inputid s11c3q5 s11c3q10
 					rename (s11c3q5 s11c3q10) (input_purchase input_rent)
 					

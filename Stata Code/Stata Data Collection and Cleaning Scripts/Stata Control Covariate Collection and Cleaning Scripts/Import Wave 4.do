@@ -5,7 +5,7 @@ set more off   // prevents output from pausing with "more"
 
 //making a head HH flag for future use
 //this is used later to identify head of HH characteristics
-use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", clear
+use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect1_harvestw4.dta", clear
 	keep state hhid indiv s1q3
 	keep if s1q3 == 1
 	drop s1q3 indiv
@@ -15,7 +15,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	save `head_flag'
 
 //HH member composition
-	use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect1_harvestw4.dta", clear
 		//flagging observations for household members
 		gen member = 0
 		replace member = 1 if s1q4a==1 | s1q8b==1
@@ -64,7 +64,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	restore
 	
 //pulling general demographic info about HH head
-	use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect1_harvestw4.dta", clear
 	keep hhid indiv s1q2 s1q3 s1q4 s1q7 s1q21 s1q27 s1q17
 	keep if s1q3 == 1
 	drop indiv //indiv is redundent when we keep only heads
@@ -86,7 +86,6 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	winsor2 npk_rate, cuts(1 99)
 	winsor2 org_fert_rate, cut(1 99)
 	rename (npk_rate org_fert_rate) (w_npk_rate w_org_fert_rate)
-	drop npk_rate org_fert_rate
 	
 	//dropping one missing row
 	keep if !missing(hhid)
@@ -96,7 +95,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	save `income'
 
 //pulling data on phone ownership and internet access
-	use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect4b_plantingw4.dta", clear	
+	use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect4b_plantingw4.dta", clear	
 	keep hhid s4bq8 s4bq14
 	rename (s4bq8 s4bq14) (s5bq8 s5bq14) //renaming to be consistent w/ Wave 5
 	
@@ -113,7 +112,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	save `phone_type'
 
 //pulling HH that didn't attempt to get loans
-	use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect4c1_plantingw4.dta" if s4cq1 == 2, clear
+	use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect4c1_plantingw4.dta" if s4cq1 == 2, clear
 	rename s4cq1 applied
 	gen wave = 4
 	gen lid = 0
@@ -122,7 +121,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect1_harvestw4.dta", 
 	
 //getting loan data and with descriptive details for classifying the loans as agricultural credit (more processing in the "Import Post Cleaning.do" file)
 //this is are most important source of data for the analysis, we merge everthing else onto this data
-	use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect4c2_plantingw4.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect4c2_plantingw4.dta", clear
 	gen s4cq1 = 1 //applied for a loan
 	
 	keep lid zone state sector lga ea hhid lid s4cq1 s4cq4 s4cq19 s4cq20 s4cq26 s4cq2b
