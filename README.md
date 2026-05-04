@@ -1,4 +1,4 @@
 # 2nd-Year-Paper
-This is a repository for my second year PhD paper stata and python code.
+This is the production package for "Evaluating Agricultural Loans and Expenditure Allocation in Nigeria Using Double Machine Learning."
 
 Everything is still under construction, await future changes for reproducability..
