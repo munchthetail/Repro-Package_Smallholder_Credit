@@ -29,7 +29,7 @@
 			drop if m1==2
 			drop m1
 	
-	//yearly food expenitures
+	//yearly nonfarm (total food and nonfood) expenitures
 		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/master_gen_consumption_flag_expenditures.dta", gen(m1)
 			drop if m1==2
 			drop m1 	

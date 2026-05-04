@@ -22,6 +22,7 @@ global Rscript "Rscript"
 //---------------------------------------------------------------------------
 ssc install univar,    replace
 ssc install ietoolkit, replace
+ssc install winsor2, replace
 
 //---------------------------------------------------------------------------
 //Section 2: Stata data pipeline
