@@ -1,51 +1,51 @@
 // This file collects all data sources for the analysis and does a few last data cleaning steps prior to DML processing.
-	lear all      // clears data, value labels, saved results, and programs
+	clear all      // clears data, value labels, saved results, and programs
 	set more off   // prevents output from pausing with "more"
 	
 	//general data
-		use "`base'/Stata Code/Stata Data Landing/cleaned_general_data.dta", clear
+		use "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", clear
 	
 		//droping multiple loans focusing on farming loans
 		duplicates drop hhid wave, force
 		
 	//merge on farming expenses
 		//labor expenses (human and rented animals)
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/labor_expenditure_data.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/labor_expenditure_data.dta", gen(m1)
 			drop if m1==2
 			drop m1
 			
 		//land expenses (land purchases, land rents, legal costs)
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/land_expenditure_data.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/land_expenditure_data.dta", gen(m1)
 			drop if m1==2
 			drop m1
 			
 		//livestock expenses (animal purchases and cost of care)
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/livestock_expenditure_data.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/livestock_expenditure_data.dta", gen(m1)
 			drop if m1==2
 			drop m1
 	
 		//input expenses (seeds, fertilizer, pecitcides, and machinery)
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/input_expenditure_data.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/input_expenditure_data.dta", gen(m1)
 			drop if m1==2
 			drop m1
 	
 	//yearly nonfarm (total food and nonfood) expenitures
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/master_gen_consumption_flag_expenditures.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/master_gen_consumption_flag_expenditures.dta", gen(m1)
 			drop if m1==2
 			drop m1 	
 	
 	//yearly food expenitures
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/master_food_flag_expenditures.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/master_food_flag_expenditures.dta", gen(m1)
 			drop if m1==2
 			drop m1 
 					
 	//shocks data
-		merge 1:1 hhid wave using "`base'/Stata Code/Stata Data Landing/Shock_index_both_waves_long.dta", gen(m1)
+		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/Shock_index_both_waves_long.dta", gen(m1)
 			drop if m1==2
 			drop m1
 	
 	//food security
-	merge m:1 hhid wave using "`base'/Stata Code/Stata Data Landing/Master_Food_Security_indexs_both_waves_long.dta", gen(m1)
+	merge m:1 hhid wave using "${root}/Stata Code/Stata Data Landing/Master_Food_Security_indexs_both_waves_long.dta", gen(m1)
 			keep if m1==3
 			drop m1
 	
@@ -102,4 +102,4 @@
 	}
 	
 	//exporting for R
-	save "`base'/Stata Code/Stata Control Covariate Collection and Cleaning Scripts/DML Cleaned Data.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", replace

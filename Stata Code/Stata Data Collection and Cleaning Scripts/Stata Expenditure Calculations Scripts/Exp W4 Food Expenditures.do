@@ -8,7 +8,7 @@
 	//HOUSEHOLD SURVEY
 		//post havest
 			//food expenditures
-				use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect10b_harvestw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect10b_harvestw4.dta", clear
 				rename (s10bq5a s10bq9a s10bq10) (quant_purchased_week last_month_pruchased last_month_paid)
 
 				//expenditures = quantity purchased last month * (price most recently paid/units purchased) (i.e. cost per unit)
@@ -28,7 +28,7 @@
 				save `expend_a'
 				
 			//food away from home
-				use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect10a_harvestw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect10a_harvestw4.dta", clear
 				keep if s10aq1==1 //keep if made a purchase in this class
 				keep hhid item_cd s10aq2
 				rename s10aq2 item_expenditure
@@ -48,7 +48,7 @@
 			
 		//post planting
 			//food expenditures
-				use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect7b_plantingw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect7b_plantingw4.dta", clear
 				rename (s7bq5a s7bq9a s7bq10) (quant_purchased_week last_week_pruchased last_week_paid)
 
 				//expenditures = quantity purchased last month * (price most recently paid/units purchased) (i.e. cost per unit)
@@ -68,7 +68,7 @@
 				save `expend_c'
 				
 			//food away from home
-				use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect7a_plantingw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect7a_plantingw4.dta", clear
 				keep if s7aq1==1 //keep if made a purchase in this class
 				keep hhid item_cd s7aq2
 				rename s7aq2 item_expenditure
@@ -102,4 +102,4 @@
 		2 "2. Food Away From Home"
 	label values item_cd item_lbl
 			
-	save "`base'/Stata Code/Stata Data Landing/food_expenditures_w4.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/food_expenditures_w4.dta", replace

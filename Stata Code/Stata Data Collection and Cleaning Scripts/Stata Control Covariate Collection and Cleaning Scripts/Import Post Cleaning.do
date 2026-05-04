@@ -4,12 +4,12 @@
 	set more off   // prevents output from pausing with "more"
 
 //running pre req files
-	do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 4.do"	
-	do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 5.do"
+	do "${root}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 4.do"	
+	do "${root}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 5.do"
 	
 //appending data
-	use "`base'/Stata Code/Stata Data Landing/import_data_w5.dta", clear
-	append using "`base'/Stata Code/Stata Data Landing/import_data_w4.dta" 
+	use "${root}/Stata Code/Stata Data Landing/import_data_w5.dta", clear
+	append using "${root}/Stata Code/Stata Data Landing/import_data_w4.dta" 
 							
 	//total fertilizer use statistic
 	egen total_fert_kg_ha = rowtotal(w_npk_rate w_org_fert_rate w_inorg_fert_rate)
@@ -109,4 +109,4 @@
 	//got a nonfarming loan indicator
 	gen non_farming_loan = (loan_reason > 1 & loan_reason!=.)
 	
-	save "`base'/Stata Code/Stata Data Landing/cleaned_general_data.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", replace

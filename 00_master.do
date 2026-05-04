@@ -44,10 +44,10 @@ do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Food Security
 do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Shocks Pull.do"
 
 //2.4 Standalone expenditure components
-do "`base'/Stata Expenditure Calculations Scripts/Labor Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Land Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Livestock Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Seed_Fertilizer Expenses.do"
+do "`base'/Stata Expenditure Calculations Scripts/Exp Labor Expenses.do"
+do "`base'/Stata Expenditure Calculations Scripts/Exp Land Expenses.do"
+do "`base'/Stata Expenditure Calculations Scripts/Exp Livestock Expenses.do"
+do "`base'/Stata Expenditure Calculations Scripts/Exp Seed_Fertilizer Expenses.do"
 
 //2.5 Consumption expenditures (internally calls W4 and W5 sub-scripts)
 do "`base'/Stata Expenditure Calculations Scripts/Exp Master Pulls.do"

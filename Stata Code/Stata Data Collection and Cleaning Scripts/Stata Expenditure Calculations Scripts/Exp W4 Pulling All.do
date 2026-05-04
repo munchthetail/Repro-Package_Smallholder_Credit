@@ -3,12 +3,12 @@
 	set more off   // prevents output from pausing with "more"
 
 	//doing pre req files
-	do "`base'/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W4 Nonfood Expenditures.do"
-	do "`base'/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W4 Food Expenditures.do"
+	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W4 Nonfood Expenditures.do"
+	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W4 Food Expenditures.do"
 
 	//pulling data from pre reqs
-		use "`base'/Stata Code/Stata Data Landing/food_expenditures_w4.dta", clear
-		append using "`base'/Stata Code/Stata Data Landing/nonfood_expenditures_household_w4.dta"
+		use "${root}/Stata Code/Stata Data Landing/food_expenditures_w4.dta", clear
+		append using "${root}/Stata Code/Stata Data Landing/nonfood_expenditures_household_w4.dta"
 
 	//grouping consumption:
 			gen item_group = .
@@ -82,6 +82,6 @@
 				reshape wide item_expenditure, i(hhid wave) j(`v')
 				rename (item_expenditure0 item_expenditure1) (non_`v' `v')
 				
-				save "`base'/Stata Code/Stata Data Landing/w4_`v'_expenditures.dta", replace
+				save "${root}/Stata Code/Stata Data Landing/w4_`v'_expenditures.dta", replace
 			restore
 		}

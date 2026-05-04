@@ -9,7 +9,7 @@
 	set more off   // prevents output from pausing with "more"
 
 	//wave 5
-		use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect12_harvestw5.dta", clear
+		use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect12_harvestw5.dta", clear
 			
 			//classifying shocks into four broad categories
 			gen byte food_shock = inlist(shock_cd, 1, 2, 3, 4, 5, 6, 7, 8, 16, 22, 24)
@@ -27,7 +27,7 @@
 			replace price_shock = price_shock*recent_flag
 			
 			//summing shocks for aggregate household metric
-			collapse (sum) food_shock income_shock price_shock other_shock, by(hhid)
+			collapse (sum) food_shock income_shock price_shock, by(hhid)
 			
 			gen wave = 5
 			
@@ -36,10 +36,10 @@
 			save `shock_w5'
 			
 	//wave 4
-		use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect15a_harvestw4.dta", clear
+		use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect15a_harvestw4.dta", clear
 			
 			//classifying shocks into four broad categories`
-			replace food_shock = inlist(shock_cd,9,10,12,13,14,15,16,17,18,20)
+			gen byte food_shock = inlist(shock_cd,9,10,12,13,14,15,16,17,18,20)
 			gen byte income_shock = inlist(shock_cd, 1,2,3,4,5,6,7,8,9,11,21)
 			gen byte price_shock = inlist(shock_cd, 18,19,20)
 			//we include this but it is not utilized in the analysis because of its difficulty to classify (e.g. category: Kidnapping/Hijacking/robbery/assault)
@@ -59,10 +59,10 @@
 			replace recency = 2 if year_2019==1
 
 			//summing shocks for aggregate household metric
-			collapse (sum) food_shock income_shock price_shock other_shock, by(hhid)
+			collapse (sum) food_shock income_shock price_shock, by(hhid)
 			
 			gen wave = 4
 			append using `shock_w5'
 
 	//saving
-	save "`base'/Stata Code/Stata Data Landing/Shock_index_both_waves_long.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/Shock_index_both_waves_long.dta", replace

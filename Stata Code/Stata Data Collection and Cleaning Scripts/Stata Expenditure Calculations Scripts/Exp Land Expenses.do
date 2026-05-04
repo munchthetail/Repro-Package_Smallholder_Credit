@@ -8,7 +8,7 @@
 	//Post Planting
 		//agricultural survey
 			//land expensitures
-				use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect11b1_plantingw5.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect11b1_plantingw5.dta", clear
 				
 				keep hhid plotid s11b1q3 s11b1q5 s11b1q11 s11b1q20 s11b1q21 s11b1q22 s11b1q23 s11b1q30 s11b1q21_os s11b1q23_os
 				rename (s11b1q3 s11b1q5 s11b1q11 s11b1q20 s11b1q21 s11b1q22 s11b1q23 s11b1q30 s11b1q21_os s11b1q23_os) /// 
@@ -104,7 +104,7 @@
 	//Post Planting
 		//agricultural survey
 			//land expensitures
-				use "`base'/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect11b1_plantingw4.dta", clear
+				use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect11b1_plantingw4.dta", clear
 				keep hhid plotid s11b1q3 s11b1q5 s11b1q8a s11b1q13 s11b1q13a s11b1q14 s11b1q14a  s11b1q14b1 s11b1q13a_os // s11b1q23_os Other category for PIKE doesn't seems to be in data set resulting in 2 observations dropped
 				drop if s11b1q14a==5
 				rename (s11b1q3 s11b1q5 s11b1q8a s11b1q13 s11b1q13a s11b1q14 s11b1q14a  s11b1q14b1 s11b1q13a_os) /// 
@@ -197,4 +197,4 @@
 	append using `land_w5'
 	
 	//saving
-	save "`base'/Stata Code/Stata Data Landing/land_expenditure_data.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/land_expenditure_data.dta", replace

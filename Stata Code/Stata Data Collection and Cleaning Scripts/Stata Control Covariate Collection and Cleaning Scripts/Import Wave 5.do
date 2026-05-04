@@ -6,7 +6,7 @@ set more off   // prevents output from pausing with "more"
 
 //making a head HH flag for future use
 //this is used later to identify head of HH characteristics
-use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
+use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
 	keep state hhid indiv s1q3 
 	keep if s1q3 == 1
 	drop s1q3 indiv
@@ -16,7 +16,7 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	save `head_flag'
 	
 //HH member composition
-	use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
 		
 	//flagging observations for household members
 	gen member = 0
@@ -60,11 +60,11 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	preserve
 		keep hhid member
 		rename member weight
-		save "`base'/Stata Code/Stata Data Landing/Nigeria_GHS_W5_household_weights.dta",replace
+		save "${root}/Stata Code/Stata Data Landing/Nigeria_GHS_W5_household_weights.dta",replace
 	restore
 	
 //pulling general demographic info about HH head
-	use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", clear
 	keep hhid indiv s1q2 s1q3 s1q6 s1q16 s1q28 s1q33 s1q24
 	keep if s1q3 == 1 
 	drop indiv //indiv is redundent when we keep only heads
@@ -75,10 +75,10 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	save `head_demo'
 
 //pulling income data FROM EPAR
-	use "`base'/Source Data/Nigeria GHS Wave 5/final_data/Nigeria_GHS_W5_household_variables.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/final_data/Nigeria_GHS_W5_household_variables.dta", clear
 
 	//keeping income variables 
-		keep hhid ag_hh w_nonfarm_income w_value_assets formal_land_rights_hh w_npk_rate w_org_fert_rate w_inorg_fert_rate \\\ 
+		keep hhid ag_hh w_nonfarm_income w_value_assets formal_land_rights_hh w_npk_rate w_org_fert_rate w_inorg_fert_rate /// 
 			w_value_crop_production lvstck_holding_tlu w_nonfarm_income ag_hh w_farm_size_agland
 
 	//dropping one missing row 
@@ -89,7 +89,7 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	save `income'
 
 //pulling data on phone ownership and internet access
-	use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5b_plantingw5.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5b_plantingw5.dta", clear
 	keep hhid s5bq8 s5bq14
 	
 	//recoding (NO==2 -> NO==0)
@@ -105,7 +105,7 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	save `phone_type'
 	
 //pulling HH that didn't attempt to get loans
-	use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5c1_plantingw5.dta" if s5cq1 == 2, clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5c1_plantingw5.dta" if s5cq1 == 2, clear
 	gen lid = 0
 	gen wave = 5
 	rename s5cq1 applied
@@ -114,7 +114,7 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 	
 //getting loan data and with descriptive details for classifying the loans as agricultural credit (more processing in the "Import Post Cleaning.do" file)
 //this is are most important source of data for the analysis, we merge everthing else onto this data
-	use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5c2_plantingw5.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect5c2_plantingw5.dta", clear
 	keep lid zone state sector lga ea hhid lid s5cq1 s5cq4 s5cq5 s5cq6 s5cq12 s5cq2b
 	rename (s5cq5 s5cq6 s5cq12 s5cq2b s5cq1 s5cq4) (requested_loan loan_status loan_amount_recieved lender_type applied loan_reason)
 	
@@ -231,4 +231,4 @@ use "`base'/Source Data/Nigeria GHS Wave 5/RAW DTA files/sect1_harvestw5.dta", c
 		keep if m1==3
 		drop m1
 		
-	save "`base'/Stata Code/Stata Data Landing/import_data_w5_v1.dta", replace
+	save "${root}/Stata Code/Stata Data Landing/import_data_w5.dta", replace

@@ -37,8 +37,8 @@ setwd(here::here())
 w4_raw <- read_dta("Source Data/Nigeria GHS Wave 4/Raw DTA files/sect12_harvestw4.dta")
 w5_raw <- read_dta("Source Data/Nigeria GHS Wave 5/Raw DTA files/sect7_harvestw5.dta")
 
-w4_weights <- read_dta("`base'/Stata Code/Stata Data Landing/Nigeria_GHS_W4_household_weights.dta")
-w5_weights <- read_dta("`base'/Stata Code/Stata Data Landing/Nigeria_GHS_W5_household_weights.dta")
+w4_weights <- read_dta("Stata Code/Stata Data Landing/Nigeria_GHS_W4_household_weights.dta")
+w5_weights <- read_dta("Stata Code/Stata Data Landing/Nigeria_GHS_W5_household_weights.dta")
 
 w4_raw <- inner_join(w4_raw, w4_weights, by = "hhid", relationship = "one-to-one")
 w5_raw <- inner_join(w5_raw, w5_weights, by = "hhid", relationship = "one-to-one")
