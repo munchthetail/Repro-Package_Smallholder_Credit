@@ -1,0 +1,54 @@
+%%% Table created in Stata by command iebaltab
+%%% (https://github.com/worldbank/ietoolkit)
+%%% (https://dimewiki.worldbank.org/iebaltab)
+%%% The command was specified exactly like this: 
+%%% iebaltab w_farm_size_agland w_value_crop_production w_value_assets w_nonfarm_income w_lvstck_holding_tlu ag_plot_formal_rights_hh income_shock food_shock price_shock head_maritial_status head_age head_sex member adult_member phone_access internet_access probability_moderately_insecure FCS_index non_farming_loan, grpvar(any_arv_farm_loan) vce(robust) rowvarlabels format(%9.3f) savetex("c:/Users/Will/Documents/GitHub/2nd-Year-Paper/Tables and Figures/balance_table.tex") replace
+
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc}
+\\[-1.8ex]\hline \hline \\[-1.8ex]
+ & \multicolumn{2}{c}{(1)}  & \multicolumn{2}{c}{(2)}  & \multicolumn{2}{c}{(1)-(2)} \\
+ & \multicolumn{2}{c}{0}  & \multicolumn{2}{c}{1}  & \multicolumn{2}{c}{Pairwise t-test}  \\
+Variable & N & Mean/(SE) & N & Mean/(SE) & N & Mean difference \\ \hline \\[-1.8ex] 
+w\_farm\_size\_agland   & 5582    & 1.183    & 318    & 1.357    & 5900    & -0.174**   \\
+ &   & (0.019)  &   & (0.082)  &   &  \\ [1ex]
+w\_value\_crop\_production   & 5582    & 354.366    & 318    & 435.779    & 5900    & -81.413**   \\
+ &   & (7.631)  &   & (34.678)  &   &  \\ [1ex]
+w\_value\_assets   & 5582    & 270.264    & 318    & 230.099    & 5900    & 40.164   \\
+ &   & (7.220)  &   & (24.546)  &   &  \\ [1ex]
+w\_nonfarm\_income   & 5582    & 330.124    & 318    & 374.085    & 5900    & -43.961   \\
+ &   & (7.696)  &   & (37.417)  &   &  \\ [1ex]
+w\_lvstck\_holding\_tlu   & 5582    & 0.770    & 318    & 0.714    & 5900    & 0.055   \\
+ &   & (0.024)  &   & (0.087)  &   &  \\ [1ex]
+ag\_plot\_formal\_rights\_hh   & 5015    & 0.136    & 288    & 0.208    & 5303    & -0.072***   \\
+ &   & (0.005)  &   & (0.024)  &   &  \\ [1ex]
+income\_shock   & 5582    & 0.200    & 318    & 0.182    & 5900    & 0.018   \\
+ &   & (0.007)  &   & (0.025)  &   &  \\ [1ex]
+food\_shock   & 5582    & 0.963    & 318    & 1.044    & 5900    & -0.081   \\
+ &   & (0.016)  &   & (0.068)  &   &  \\ [1ex]
+price\_shock   & 5582    & 1.071    & 318    & 1.079    & 5900    & -0.008   \\
+ &   & (0.018)  &   & (0.079)  &   &  \\ [1ex]
+head\_maritial\_status   & 5565    & 0.776    & 317    & 0.817    & 5882    & -0.041*   \\
+ &   & (0.006)  &   & (0.022)  &   &  \\ [1ex]
+head\_age   & 5582    & 51.753    & 318    & 49.038    & 5900    & 2.715***   \\
+ &   & (0.199)  &   & (0.786)  &   &  \\ [1ex]
+head\_sex   & 5582    & 0.815    & 318    & 0.849    & 5900    & -0.034   \\
+ &   & (0.005)  &   & (0.020)  &   &  \\ [1ex]
+member   & 5582    & 5.934    & 318    & 6.487    & 5900    & -0.554***   \\
+ &   & (0.046)  &   & (0.186)  &   &  \\ [1ex]
+adult\_member   & 5582    & 2.933    & 318    & 2.947    & 5900    & -0.014   \\
+ &   & (0.021)  &   & (0.079)  &   &  \\ [1ex]
+phone\_access   & 5582    & 0.931    & 318    & 0.947    & 5900    & -0.016   \\
+ &   & (0.003)  &   & (0.013)  &   &  \\ [1ex]
+internet\_access   & 5582    & 0.349    & 318    & 0.358    & 5900    & -0.009   \\
+ &   & (0.006)  &   & (0.027)  &   &  \\ [1ex]
+probability\_moderately\_insecure   & 5582    & 0.453    & 318    & 0.436    & 5900    & 0.017   \\
+ &   & (0.006)  &   & (0.024)  &   &  \\ [1ex]
+FCS\_index   & 5582    & 53.797    & 318    & 56.223    & 5900    & -2.426**   \\
+ &   & (0.257)  &   & (1.146)  &   &  \\ [1ex]
+non\_farming\_loan   & 5582    & 0.083    & 318    & 0.025    & 5900    & 0.058***   \\
+ &   & (0.004)  &   & (0.009)  &   &  \\ [1ex]
+\hline \hline \\[-1.8ex]
+%%% This is the note. If it does not have the correct margins, use texnotewidth() option or change the number before '\textwidth' in line below to fit it to table size.
+\multicolumn{6}{@{} p{\textwidth}}{If the table includes missing values (.n, .o, .v etc.) see the Missing values section in the help file for the Stata command iebaltab for definitions of these values. Significance: ***=.01, **=.05, *=.1. Errors are robust. Full user input as written by user: [iebaltab w\_farm\_size\_agland w\_value\_crop\_production w\_value\_assets w\_nonfarm\_income w\_lvstck\_holding\_tlu ag\_plot\_formal\_rights\_hh income\_shock food\_shock price\_shock head\_maritial\_status head\_age head\_sex member adult\_member phone\_access internet\_access probability\_moderately\_insecure FCS\_index non\_farming\_loan, grpvar(any\_arv\_farm\_loan) vce(robust) rowvarlabels format(\%9.3f) savetex("c:/Users/Will/Documents/GitHub/2nd-Year-Paper/Tables and Figures/balance\_table.tex") replace] }
+
+\end{tabular}

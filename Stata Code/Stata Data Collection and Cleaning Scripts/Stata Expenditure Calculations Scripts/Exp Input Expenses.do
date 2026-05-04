@@ -147,9 +147,9 @@
 			append using `input_w5'
 			
 			//winsorizing consistent with many other variabels in the analysis
-			winsor2 seed_exp fertilizer_exp pecticide_exp machine_exp, replace cut(0 99) by(wave)
+			winsor2 seed_exp fert_mach_pecticide_exp fert_pest_mach_transport_exp, replace cut(0 99) by(wave)
 			
-			egen total_input_exp = rowtotal(seed_exp fertilizer_exp pecticide_exp machine_exp)
+			egen total_input_exp = rowtotal(seed_exp fert_mach_pecticide_exp fert_pest_mach_transport_exp)
 	
 	//saving
 	save "${root}/Stata Code/Stata Data Landing/input_expenditure_data.dta", replace

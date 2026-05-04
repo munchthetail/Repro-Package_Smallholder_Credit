@@ -3,8 +3,8 @@
 	set more off   // prevents output from pausing with "more"
 	
 	//doing pre req files
-	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W5 Pulling All.do"
-	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W4 Pulling All.do"
+	do "${base}/Stata Expenditure Calculations Scripts/Exp W5 Pulling All.do"
+	do "${base}/Stata Expenditure Calculations Scripts/Exp W4 Pulling All.do"
 
 	//collecting nonfarm expenditures data
 	local vars food_flag gen_consumption_flag

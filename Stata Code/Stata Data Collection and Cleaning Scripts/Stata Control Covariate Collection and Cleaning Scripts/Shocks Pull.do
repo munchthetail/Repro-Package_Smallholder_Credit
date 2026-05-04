@@ -37,6 +37,8 @@
 			
 	//wave 4
 		use "${root}/Source Data/Nigeria GHS Wave 4/RAW DTA files/sect15a_harvestw4.dta", clear
+			keep hhid shock_cd s15aq1 s15aq2 s15aq3a s15aq3b s15aq3c
+			rename (s15aq1 s15aq2 s15aq3a s15aq3b s15aq3c) (been_shocked shock_frequency year_2017 year_2018 year_2019)
 			
 			//classifying shocks into four broad categories`
 			gen byte food_shock = inlist(shock_cd,9,10,12,13,14,15,16,17,18,20)

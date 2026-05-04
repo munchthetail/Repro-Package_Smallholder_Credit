@@ -55,7 +55,7 @@
 					replace days_sum2 = 365 if rent_period_other == "FOR THE PLANTING AND HARVEST PERIOD."
 					
 					//method for annualizing rental expenses based on the implied rental period
-					replace year_converter = .
+					gen year_converter = .
 					replace year_converter = days_sum2/365
 					//annualizing
 					replace land_rent = land_rent/year_converter if !missing(year_converter)
@@ -151,7 +151,7 @@
 					replace days_sum2 = 365 if rent_period_other == "FOR THE PLANTING AND HARVEST PERIOD."
 					
 					//method for annualizing rental expenses based on the implied rental period
-					replace year_converter = .
+					gen year_converter = .
 					replace year_converter = days_sum2/365
 					//annualizing
 					replace land_rent = land_rent/year_converter if !missing(year_converter)

@@ -10,6 +10,7 @@
     //the root should be at the base level of the repoduction file, if this isn't working, the manually set the root
     // e.g. "C:/Users/Admin/Downloads/repdocution-code-file"
 global root "`c(pwd)'"
+global base "${root}/Stata Code/Stata Data Collection and Cleaning Scripts"
 
 //this is used to run the rscript automatically
 //if the Rscript is not on PATH, replace with full path, e.g.:
@@ -27,7 +28,6 @@ ssc install winsor2, replace
 //---------------------------------------------------------------------------
 //Section 2: Stata data pipeline
 //---------------------------------------------------------------------------
-local base "${root}/Stata Code/Stata Data Collection and Cleaning Scripts"
 
 //2.10 Import household variables (internally calls Import Wave 4 & Wave 5) and post cleaning
 do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Import Post Cleaning.do"
@@ -47,7 +47,7 @@ do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Shocks Pull.d
 do "`base'/Stata Expenditure Calculations Scripts/Exp Labor Expenses.do"
 do "`base'/Stata Expenditure Calculations Scripts/Exp Land Expenses.do"
 do "`base'/Stata Expenditure Calculations Scripts/Exp Livestock Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Exp Seed_Fertilizer Expenses.do"
+do "`base'/Stata Expenditure Calculations Scripts/Exp Input Expenses.do"
 
 //2.5 Consumption expenditures (internally calls W4 and W5 sub-scripts)
 do "`base'/Stata Expenditure Calculations Scripts/Exp Master Pulls.do"

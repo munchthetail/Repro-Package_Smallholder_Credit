@@ -3,8 +3,8 @@
 	set more off   // prevents output from pausing with "more"
 		
 	//doing pre req files
-	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W5 Nonfood Expenditures.do"
-	do "${root}/Stata Code/Stata Data Collection and Cleaning Scripts/Stata Expenditure Calculations Scripts/Exp W5 Food Expenditures.do"
+	do "${base}/Stata Expenditure Calculations Scripts/Exp W5 Nonfood Expenditures.do"
+	do "${base}/Stata Expenditure Calculations Scripts/Exp W5 Food Expenditures.do"
 		
 	//pulling data from pre reqs
 		use "${root}/Stata Code/Stata Data Landing/food_expenditures_w5.dta", clear

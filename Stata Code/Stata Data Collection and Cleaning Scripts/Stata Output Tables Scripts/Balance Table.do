@@ -1,12 +1,10 @@
 // Will Hankins edit 8/12/25
 	clear all      // clears data, value labels, saved results, and programs
 	set more off   // prevents output from pausing with "more"
-	cd "C:\Users\Will\OneDrive - The Ohio State University\RA\Data\EPAR Nigeria"
-	global raw_folder "C:\Users\Will\OneDrive - The Ohio State University\RA\Admin\LSMS-Agricultural-Indicators-Code-main\LSMS-Agricultural-Indicators-Code-main\Nigeria GHS\Nigeria GHS Wave 5\Raw DTA files"
 	
 	ssc install ietoolkit, replace
 	
-	use "C:\Users\Will\OneDrive - The Ohio State University\RA\Data\DML Cleaned Data.dta", clear
+	use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", clear
 	
 	//adjust to DML model
 	//keep observations found in both waves
@@ -24,4 +22,4 @@
     vce(robust) ///
     rowvarlabels ///
     format(%9.3f) ///
-    savetex("balance_table.tex") replace
+    savetex("${root}/Tables and Figures/balance_table.tex") replace

@@ -12,7 +12,7 @@
 				rename (s10bq5a s10bq9a s10bq10) (quant_purchased_week last_month_pruchased last_month_paid)
 
 				//expenditures = quantity purchased last month * (price most recently paid/units purchased) (i.e. cost per unit)
-				gen item_expenditure = quant_purchased_week*(last_week_paid/last_week_pruchased)
+				gen item_expenditure = quant_purchased_week*(last_month_paid/last_month_pruchased)
 
 				//summing by household
 				collapse (sum) item_expenditure, by(hhid)

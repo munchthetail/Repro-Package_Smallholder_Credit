@@ -4,8 +4,8 @@
 	set more off   // prevents output from pausing with "more"
 
 //running pre req files
-	do "${root}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 4.do"	
-	do "${root}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 5.do"
+	do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 4.do"	
+	do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Import Wave 5.do"
 	
 //appending data
 	use "${root}/Stata Code/Stata Data Landing/import_data_w5.dta", clear
@@ -72,9 +72,7 @@
 			gen loan_health = (loan_reason==12)
 			
 	//getting loan acceptances
-		local vars1 loan_farming loan_nonfarming loan_misc loan_education loan_general_consumption loan_health loan_productivity_flag
-		
-		foreach v of local vars1 {
+		foreach v in loan_farming {
 			gen approv_`v' = `v'
 			replace approv_`v' = 0 if loan_status == 0
 		}
@@ -83,7 +81,6 @@
 	winsor2 loan_amount_recieved, replace cuts(0 99)
 	
 	//changing for readability
-	replace w_total_income = w_total_income/1000
 	replace w_value_assets = w_value_assets/1000
 	replace w_nonfarm_income = w_nonfarm_income/1000
 	replace w_value_crop_production = w_value_crop_production/1000
@@ -92,6 +89,9 @@
 	winsor2 lvstck_holding_tlu, replace cut(0 99)
 	rename lvstck_holding_tlu w_lvstck_holding_tlu
 	
+	//renaming for clarity
+	rename formal_land_rights_hh ag_plot_formal_rights_hh
+
 	//counts for any approval for farming loans and total loan amounts
 		preserve
 
