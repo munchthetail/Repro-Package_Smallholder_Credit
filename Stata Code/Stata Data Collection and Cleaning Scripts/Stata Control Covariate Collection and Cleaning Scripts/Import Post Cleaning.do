@@ -10,14 +10,19 @@
 //appending data
 	use "${root}/Stata Code/Stata Data Landing/import_data_w5.dta", clear
 	append using "${root}/Stata Code/Stata Data Landing/import_data_w4.dta" 
-							
+	
+	//maching drops with prior code done in the import stage
+	//merge m:1 hhid wave using "C:/Users/Will/Downloads/diffs.dta", gen(m1)
+	//	drop if m1==3 //dropping obs that were dropped in the import stage for consistency (mostly due to missingness in key variables)
+	//	drop m1
+
 	//total fertilizer use statistic
 	egen total_fert_kg_ha = rowtotal(w_npk_rate w_org_fert_rate w_inorg_fert_rate)
 	
 	//fixing some flags
 		//loan status
 			replace loan_status = 1 if loan_status == 2 //approved but pending distribution loands lumped with approved and distributed
-			replace loan_status = . if loan_status == 3 //dropping pending loan decisions 
+			replace loan_status = 0 if loan_status == 3 //dropping pending loan decisions 
 			replace loan_status = 0 if loan_status == 4 //loan denied
 		
 		//sex flag (MALE==1, FEMALE==0)
@@ -64,12 +69,12 @@
 		rename (s5bq8 s5bq14) (phone_access internet_access)
 	
 	//loan reasoning groups
-			gen loan_farming = (loan_reason==1)
-			gen loan_nonfarming = (loan_reason==5)
-			gen loan_misc = (loan_reason==7)
-			gen loan_education = (loan_reason==8)
-			gen loan_general_consumption = (loan_reason==11)
-			gen loan_health = (loan_reason==12)
+		gen loan_farming = (loan_reason==1)
+		gen loan_nonfarming = (loan_reason==5)
+		gen loan_misc = (loan_reason==7)
+		gen loan_education = (loan_reason==8)
+		gen loan_general_consumption = (loan_reason==11)
+		gen loan_health = (loan_reason==12)
 			
 	//getting loan acceptances
 		foreach v in loan_farming {

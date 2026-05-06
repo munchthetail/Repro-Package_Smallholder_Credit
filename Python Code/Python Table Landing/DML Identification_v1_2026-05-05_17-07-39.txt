@@ -1,0 +1,22 @@
+================================================================================
+Script: DML Identification  |  Version: v1  |  Started: 2026-05-05_17-07-39
+================================================================================
+
+Loading data from: DML Cleaned Data.dta
+Loaded 6398 observations.
+
+Generating folds: K=[5], N_REP=30...
+Folds generated.
+
+Base frame: 6398 obs (3199 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+   [loan nuisance K=5] Loading cached predictions from loan_hat_K5_R30.npy
+
+======================================================================
+OUTCOME: ln_gen_consumption_flag
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 5900 obs (2950 households), 249 dropped households

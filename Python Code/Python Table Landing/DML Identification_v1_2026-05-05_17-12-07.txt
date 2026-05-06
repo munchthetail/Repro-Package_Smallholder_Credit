@@ -1,0 +1,65 @@
+================================================================================
+Script: DML Identification  |  Version: v1  |  Started: 2026-05-05_17-12-07
+================================================================================
+
+Loading data from: DML Cleaned Data.dta
+Loaded 6398 observations.
+
+Generating folds: K=[5], N_REP=30...
+Folds generated.
+
+Base frame: 6398 obs (3199 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+
+======================================================================
+OUTCOME: ln_gen_consumption_flag
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 5900 obs (2950 households), 249 dropped households
+   [outcome nuisance ln_gen_consumption_flag K=5] Saved to outcome_hat_ln_gen_consumption_flag_K5_R30.npy
+
+**********************************************************************
+OUTCOME: ln_gen_consumption_flag | K=5 | N_REP=30 | N=5900
+**********************************************************************
+
+>>> DML Estimates:
+                 coef   std err         t     P>|t|     2.5 %    97.5 %
+loan         0.127236  0.047763  2.663901  0.007724  0.033453  0.220850
+loan_x_size -0.022472  0.031286 -0.718262  0.472596 -0.083478  0.038848
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.4206
+    Treatment R2  (D ~ X):   0.0056
+    Treatment AUC (D ~ X):   0.6311
+    Treatment AP  (D ~ X):   0.0808
+
+
+======================================================================
+OUTCOME: ln_total_farm_expense
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 5476 obs (2738 households), 461 dropped households
+   [outcome nuisance ln_total_farm_expense K=5] Saved to outcome_hat_ln_total_farm_expense_K5_R30.npy
+
+**********************************************************************
+OUTCOME: ln_total_farm_expense | K=5 | N_REP=30 | N=5476
+**********************************************************************
+
+>>> DML Estimates:
+                 coef   std err         t     P>|t|     2.5 %    97.5 %
+loan         0.130680  0.069222  1.887836  0.059048 -0.005069  0.266354
+loan_x_size  0.078257  0.044918  1.742224  0.081469 -0.011175  0.166295
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.3505
+    Treatment R2  (D ~ X):   0.0055
+    Treatment AUC (D ~ X):   0.6284
+    Treatment AP  (D ~ X):   0.0824
+
+
+================================================================================
+Run complete.
+================================================================================

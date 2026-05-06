@@ -1,8 +1,6 @@
-// Will Hankins edit 8/12/25
+//this script produces the balance table in the appendix
 	clear all      // clears data, value labels, saved results, and programs
 	set more off   // prevents output from pausing with "more"
-	
-	ssc install ietoolkit, replace
 	
 	use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", clear
 	

@@ -1,0 +1,71 @@
+================================================================================
+Script: DML Identification  |  Version: v1  |  Started: 2026-05-04_21-27-37
+================================================================================
+
+Loading data from: DML Cleaned Data.dta
+Loaded 6398 observations.
+
+Generating folds: K=[5], N_REP=5...
+Folds generated.
+
+Base frame: 6398 obs (3199 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+   [loan nuisance K=5] Fitting on 6398 obs, 5 reps × 5 folds...
+   [loan nuisance K=5] Saved to loan_hat_K5_R5.npy
+
+======================================================================
+OUTCOME: ln_gen_consumption_flag
+======================================================================
+   -> Imputing 4 variables with missing values, adding indicator flags...
+   -> 6398 obs (3199 households), 0 dropped households
+
+   Estimating outcome nuisance for ln_gen_consumption_flag...
+   [outcome nuisance ln_gen_consumption_flag K=5] Fitting on 6398 obs, 5 reps × 5 folds...
+   [outcome nuisance ln_gen_consumption_flag K=5] Saved to outcome_hat_ln_gen_consumption_flag_K5_R5.npy
+
+**********************************************************************
+OUTCOME: ln_gen_consumption_flag | K=5 | N_REP=5 | N=6398
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.114858  0.045879  2.503501  0.012297  0.024937  0.204779
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.4399
+    Treatment R2  (D ~ X):   0.0059
+    Treatment AUC (D ~ X):   0.6319
+    Treatment AP  (D ~ X):   0.0772
+
+
+======================================================================
+OUTCOME: ln_total_farm_expense
+======================================================================
+   -> Imputing 4 variables with missing values, adding indicator flags...
+   -> 5812 obs (2906 households), 293 dropped households
+
+   Estimating outcome nuisance for ln_total_farm_expense...
+   [outcome nuisance ln_total_farm_expense K=5] Fitting on 5812 obs, 5 reps × 5 folds...
+   [outcome nuisance ln_total_farm_expense K=5] Saved to outcome_hat_ln_total_farm_expense_K5_R5.npy
+
+**********************************************************************
+OUTCOME: ln_total_farm_expense | K=5 | N_REP=5 | N=5812
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.152807  0.067806  2.253609  0.024221  0.019911  0.285704
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.3812
+    Treatment R2  (D ~ X):   0.0060
+    Treatment AUC (D ~ X):   0.6300
+    Treatment AP  (D ~ X):   0.0800
+
+
+================================================================================
+Run complete.
+================================================================================

@@ -68,7 +68,7 @@
 				state wave hhid ///
 				probability_moderately_insecure FCS_index ///
 				internet_access phone_access farming_loan_total_amount ///
-				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha 
+				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha /// 
 	
 	//remove variable labels
 	ds

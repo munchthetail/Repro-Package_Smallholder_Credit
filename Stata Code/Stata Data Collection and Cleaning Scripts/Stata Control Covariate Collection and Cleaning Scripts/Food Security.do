@@ -19,6 +19,7 @@
 			//found in section 5c of post harvest household survey
 			use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect5c_harvestw5.dta", clear
 			
+			replace item_cd = 1 if item_cd==2 //recoding mains staples
 			drop if inlist(item_cd,6,11,12) //not core categories spices and beverages
 			
 			//weighting different answers using standard equation:
@@ -58,6 +59,7 @@
 			//last section of food consumption is exactly what we need presubably by design
 			use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect10c_harvestw4.dta", clear
 			
+			replace item_cd = 1 if item_cd==2 //recoding mains staples
 			drop if inlist(item_cd,6,11) //not core categories spices and beverages
 			
 			//weighting different answers using standard equation:

@@ -1,0 +1,46 @@
+================================================================================
+Script: DML Identification  |  Version: v1  |  Started: 2026-05-04_21-11-59
+================================================================================
+
+Loading data from: DML Cleaned Data.dta
+Loaded 6036 observations.
+
+Generating folds: K=[5], N_REP=5...
+Folds generated.
+
+Base frame: 6036 obs (3018 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+   [loan nuisance K=5] Fitting on 6036 obs, 5 reps × 5 folds...
+   [loan nuisance K=5] Saved to loan_hat_K5_R5.npy
+
+======================================================================
+OUTCOME: ln_gen_consumption_flag
+======================================================================
+   -> Imputing 4 variables with missing values, adding indicator flags...
+   -> 6036 obs (3018 households), 0 dropped households
+
+   Estimating outcome nuisance for ln_gen_consumption_flag...
+   [outcome nuisance ln_gen_consumption_flag K=5] Fitting on 6036 obs, 5 reps × 5 folds...
+   [outcome nuisance ln_gen_consumption_flag K=5] Saved to outcome_hat_ln_gen_consumption_flag_K5_R5.npy
+
+**********************************************************************
+OUTCOME: ln_gen_consumption_flag | K=5 | N_REP=5 | N=6036
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.112292  0.046119  2.434843  0.014898  0.021901  0.202684
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.4356
+    Treatment R2  (D ~ X):   0.0077
+    Treatment AUC (D ~ X):   0.6408
+    Treatment AP  (D ~ X):   0.0886
+
+
+================================================================================
+Run complete.
+================================================================================

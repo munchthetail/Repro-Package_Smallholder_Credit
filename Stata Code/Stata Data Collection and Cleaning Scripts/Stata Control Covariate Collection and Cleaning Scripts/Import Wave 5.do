@@ -211,7 +211,7 @@ use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect1_harvestw5.dta", 
 	
 	
 	merge m:1 hhid using `head_flag', gen(m1)
-		keep if m1==3
+		//keep if m1==3
 		drop m1
 		
 	merge m:1 hhid using `phone_type', gen(m1)
