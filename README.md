@@ -1,4 +1,5 @@
-#Reporduction Package
 This is the production package for "Evaluating Agricultural Loans and Expenditure Allocation in Nigeria Using Double Machine Learning."
 
-Everything is still under construction, await future changes for reproducability..
+Use the README.pdf for instructions on use, additionally the code is thoroughly commented to enhance readability.
+
+Everything is still under construction, await future changes...
