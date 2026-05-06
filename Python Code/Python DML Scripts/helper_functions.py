@@ -1,3 +1,5 @@
+#this script provides a lot of the supporting scaffolding to the other python scripts 
+
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
@@ -101,19 +103,20 @@ def align_to_subsample(loan_hat_full, base_keys, sub_keys):
 # ============================================================
 
 def drop_first_base_cols(X, n_base_cols=19):
-    # strips the linear columns from a polynomial feature expansion
-    # leaving only the interaction and higher-order terms to avoid duplicating Branch A in the stacking pipeline
+    #forces baseline controls to be included in poly-logit lasso learner 
     return X[:, n_base_cols:]
 
 # ============================================================
 # DIAGNOSTIC HELPERS FOR BENCHMARKING
 # ============================================================
 
+#this just makes a savable name for caching data when benchmarking
 def safe_drop_label(drop):
     if isinstance(drop, list):
         return "_AND_".join(sorted(drop))
     return "__base__" if drop == "" else str(drop)
 
+#this caches benchmark data for later use
 def save_bench_values(K, N_REP, y_col, drop, d_name, theta, sigma2, nu2, var_y, cache_dir):
     y_safe = y_col.replace("/", "_").replace(" ", "_")
     drop_lbl = safe_drop_label(drop)
@@ -121,6 +124,7 @@ def save_bench_values(K, N_REP, y_col, drop, d_name, theta, sigma2, nu2, var_y, 
     with open(path, "w") as f:
         f.write(f"{y_col};{drop_lbl};{d_name};{theta};{sigma2};{nu2};{var_y}\n")
 
+#this retrieves benchmark data for the final csv document
 def load_bench_values(K, N_REP, y_col, drop, d_name, cache_dir):
     y_safe = y_col.replace("/", "_").replace(" ", "_")
     drop_lbl = safe_drop_label(drop)
@@ -129,9 +133,11 @@ def load_bench_values(K, N_REP, y_col, drop, d_name, cache_dir):
     return {"theta": float(parts[3]), "sigma2": float(parts[4]),
             "nu2": float(parts[5]), "var_y": float(parts[6])}
 
+#this computes the neccessary input for the confidence intervals, used for exporting to the csv file
+#more detail can be found at https://docs.doubleml.org/stable/guide/sensitivity.html
 def compute_benchmark_cf(base, short):
     r2_long  = 1.0 - (base["sigma2"]  / base["var_y"])
-    r2_short = 1.0 - (short["sigma2"] / base["var_y"])  # same var_y denominator
+    r2_short = 1.0 - (short["sigma2"] / base["var_y"])  #same var y denominator
     c_y      = (r2_long - r2_short) / (1.0 - r2_long)
     r2_alpha = short["nu2"] / base["nu2"]
     c_d      = (1.0 - r2_alpha) / r2_alpha

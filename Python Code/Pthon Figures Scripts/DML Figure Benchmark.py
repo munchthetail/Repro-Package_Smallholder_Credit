@@ -9,7 +9,9 @@ from pathlib import Path
 # CONFIG
 # ================================
 
-OUTPUT_DIR = Path(r"C:\Users\Admin\OneDrive - The Ohio State University\RA\Output\Prelim")
+root       = Path(__file__).resolve().parent.parent.parent
+OUTPUT_DIR = root / "Tables and Figures"
+csv_path = root / "Python Code" / "Python Table Landing"
 
 K     = 5
 N_REP = 30
@@ -60,7 +62,7 @@ def safe_outcome_label(y_col):
 
 def load_csv(K, N_REP, y_col):
     y_lbl = safe_outcome_label(y_col)
-    path  = OUTPUT_DIR / f"benchmark_K{K}_Rep{N_REP}_{y_lbl}.csv"
+    path  = csv_path / f"benchmark_K{K}_Rep{N_REP}_{y_lbl}.csv"
     if not path.exists():
         raise FileNotFoundError(f"CSV not found: {path}")
     return pd.read_csv(path, index_col="parameter")
@@ -307,6 +309,4 @@ fig.text(0.5, 0.88, "Estimated via Observed Variable Benchmarking bounds",
 plt.tight_layout(rect=[0, 0, 1, 0.93])
 
 out_path = OUTPUT_DIR / f"sensitivity_forest_plot_K{K}_Rep{N_REP}.png"
-plt.savefig(out_path, dpi=180, bbox_inches="tight", facecolor="white")
-plt.show()
-print(f"Saved to: {out_path}")
+plt.savefig(out_path, dpi=600, bbox_inches="tight", facecolor="white")

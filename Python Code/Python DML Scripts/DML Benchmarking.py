@@ -44,11 +44,7 @@ from pathlib import Path
 import numpy as np
 from doubleml import DoubleMLPLR
 from doubleml.data import DoubleMLClusterData
-from sklearn.metrics import r2_score, roc_auc_score, average_precision_score
 from sklearn.dummy import DummyRegressor
-import sys
-import re
-from datetime import datetime
 
 #custom imports from other scripts in this project
 from fold_generator import fold_generator

@@ -15,11 +15,11 @@ from sklearn.feature_selection import SelectKBest, f_classif, VarianceThreshold
 from helper_functions import drop_first_base_cols
 from functools import partial
 
-# Learners
-# otucome learners
+
+#outcome learners: elastic net, RF, GB w/ Ridge meta learner
 ml_l = make_pipeline(
-    SimpleImputer(strategy="median", add_indicator=True),
     StandardScaler(),
+    #ensemble consists of elastic net, RF, GB --- 
     StackingRegressor(
         estimators=[
             ("enet", ElasticNet(
@@ -36,9 +36,9 @@ ml_l = make_pipeline(
             ("hist_gbr_slow", HistGradientBoostingRegressor(
                 max_iter=3000,        #very high iter for robustness
                 learning_rate=0.005,  #fairly slow learner rate 0.01
-                max_depth=8,          # Deeper trees to catch complex interactions
+                max_depth=8,          #deeper trees to catch complex interactions
                 min_samples_leaf=15,
-                l2_regularization=0.1,# Slight regularization to prevent overfitting
+                l2_regularization=0.1, #slight regularization to prevent overfitting
                 random_state=42
             )),
         ],
@@ -47,61 +47,49 @@ ml_l = make_pipeline(
     )
 )
 
-# treatment learners --- GBR for the binary, RF and lasso 
-# --- Classifier for loan: P(loan=1|X) ---
-# will be passed through linearly.
-
+#treatment learners: GB classifier and poly-logistic lasso w/ logisitc meta-learner
+#we define this as a function so that we can change the number of terms 
+    #to include in the polynomial interaction generation based on the number of controls
 def make_ml_m_loan_clf(n_core=19):
     interaction_indices = list(range(n_core))
     drop_fn = partial(drop_first_base_cols, n_base_cols=n_core)
-    
+    #ensemble consists of Poly-Logit w/ L1, 
     return make_pipeline(
-        SimpleImputer(strategy="median", add_indicator=True),
         StandardScaler(),
-        StackingClassifier( # CHANGED: From Single Classifier to Stacking
+        StackingClassifier( 
             estimators=[
                 ("logit_poly", make_pipeline(
-                    SimpleImputer(strategy="median"), 
-                    
-                    # --- THE SPLIT STRATEGY ---
+                    #this sequence makes all the interactyion terms up to degree==3
                     ColumnTransformer(
                         transformers=[
-                            # BRANCH A: GUARANTEED ORIGINALS
-                            # Always keep the 19 core economic vars linear and un-dropped.
                             ("originals", "passthrough", interaction_indices),
-                            
-                            # BRANCH B: SELECTED INTERACTIONS
-                            # Generate 3rd degree polys, drop the linear copies, keep best 20.
+                            #keeps the best 20, NOTE: keeping 20 was based on computational overhead limitations, more would be fine in theory
                             ("poly_select", make_pipeline(
-                                # Generate everything (Linear + Interactions + Squares + Cubes)
+                                #(Linear + Interactions + Squares + Cubes)
                                 PolynomialFeatures(degree=3, include_bias=False, interaction_only=False),
                                 
-                                # CRITICAL STEP: Drop the first 19 linear columns so we don't duplicate Branch A
+                                #drop the original controls so we are just selecting from interaction terms
                                 FunctionTransformer(drop_fn, validate=False),
                                 
-                                # Scale and Select from the remaining pool (Interactions/Squares)
+                                #scale and s from the remaining pool
                                 StandardScaler(),
                                 SelectKBest(f_classif, k=20) 
                             ), interaction_indices),
                             
-                            # BRANCH C: CONTROLS (State Fixed Effects, Flags, etc.)
-                            # Keep everything else (Index 19+) safely passed through.
+                            #combines selected variables with original controls 
                             ("pass", "passthrough", slice(n_core, None)) 
                         ]
                     ),
-                    # -----------------------------
-
                     VarianceThreshold(),
                     StandardScaler(),
-                    
                     LogisticRegressionCV(
                         penalty='l1', 
                         solver='liblinear',
-                        class_weight='balanced',
+                        class_weight='balanced',    #set inside of ensemble to balanced to blow up signals for the meta-learner
                         scoring='roc_auc',
                         Cs=10,            
-                        cv=2, 
-                        tol=0.01,        # Loose tolerance for speed
+                        cv=2,            #cv is fine within the training fold itself
+                        tol=0.01,        #relatively loose to relax convergence speed due to hardware limitations
                         max_iter=10000,   
                         n_jobs=1,        
                         random_state=42
@@ -110,22 +98,20 @@ def make_ml_m_loan_clf(n_core=19):
                 ("hist_gbr", HistGradientBoostingClassifier(
                     max_iter=3000,
                     learning_rate=0.005,
-                    # CHANGE 1: Enable Balanced Weights (Standard GBM can't do this easily)
-                    class_weight='balanced', 
-                    # CHANGE 2: Grow "Best-First" trees, not fixed depth
+                    class_weight='balanced', #set inside of ensemble to balanced to blow up signals for the meta-learner
                     max_depth=None,          
-                    max_leaf_nodes=15,       # Allows deep, targeted branches for rare events
-                    # CHANGE 3: Allow smaller leaves to catch rare loans
+                    max_leaf_nodes=15,       #deep targeted branches for rare events
                     min_samples_leaf=10,                     
-                    l2_regularization=0.1,
+                    l2_regularization=0.1,   #avoid some overfitting with some regularization
                     random_state=42
                 ))
             ],
             final_estimator=LogisticRegression(class_weight=None),
-            stack_method='predict_proba',
+            stack_method='predict_proba', #set to sample propensity to properly scale the powerful signals from stacked learners
             cv=2,
             n_jobs=1
         )
     )
 
+#set the learner for use in the main script (when passing the learner it can't be a function with arguments)
 ml_m_loan_clf = make_ml_m_loan_clf()

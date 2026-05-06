@@ -2,10 +2,14 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+from pathlib import Path
 
-# ---------------------------
-# Aesthetic settings (UNCHANGED)
-# ---------------------------
+#setting paths
+root       = Path(__file__).resolve().parent.parent.parent
+output_dir = root / "Tables and Figures" / "Figure_A1.png"
+dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
+
+#cosmetic settings
 mpl.rcParams.update({
     "font.family": "serif",
     "font.serif": ["CMU Serif", "Computer Modern Roman", "DejaVu Serif"],
@@ -20,9 +24,7 @@ mpl.rcParams.update({
 mpl.rcParams["text.usetex"] = False
 print("usetex:", mpl.rcParams["text.usetex"])
 
-# ---------------------------
-# Simple Gaussian KDE (numpy-only)
-# ---------------------------
+#KDE settings
 def silverman_bandwidth(x: np.ndarray) -> float:
     x = x[np.isfinite(x)]
     n = x.size
@@ -42,41 +44,31 @@ def gaussian_kde_numpy(x: np.ndarray, grid: np.ndarray, bw: float | None = None)
     if bw is None:
         bw = silverman_bandwidth(x)
 
-    # Fall back if bandwidth degenerates
-    if (not np.isfinite(bw)) or bw <= 0:
-        bw = 1.0
-
     z = (grid[:, None] - x[None, :]) / bw
     dens = np.exp(-0.5 * z**2).mean(axis=1) / (bw * np.sqrt(2 * np.pi))
     return dens
 
-# ---------------------------
-# Load and align data (UNCHANGED logic)
-# ---------------------------
-df = pd.read_stata(
-    r"C:/Users/Will/OneDrive - The Ohio State University/RA/Data/DML Cleaned Data.dta"
-)
+#loan and align data (those that have land values)
+df = pd.read_stata(dta_path)
 
 df = df.dropna(subset=["w_farm_size_agland"])
 df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
 
-# ---------------------------
-# KDE plot: FCS_index by wave
-# ---------------------------
+#KDE FIES
 x4 = df.loc[df["wave"] == 4, "probability_moderately_insecure"].to_numpy(dtype=float)
 x5 = df.loc[df["wave"] == 5, "probability_moderately_insecure"].to_numpy(dtype=float)
 
-# Grid over combined support (trim extreme outliers a bit for nicer visuals)
+#grid
 x_all = np.concatenate([x4[np.isfinite(x4)], x5[np.isfinite(x5)]])
-lo, hi = np.percentile(x_all, [0.5, 99.5])  # tweak if you want tighter/looser
+lo, hi = np.percentile(x_all, [0.5, 99.5])  
 grid = np.linspace(lo, hi, 400)
 
-d4 = gaussian_kde_numpy(x4, grid)  # uses Silverman bandwidth
+d4 = gaussian_kde_numpy(x4, grid) 
 d5 = gaussian_kde_numpy(x5, grid)
 
 fig, ax = plt.subplots(figsize=(8, 4.5))
 
-# Lines
+#both lines
 ax.plot(grid, d4, linewidth=2, label="2018/19")
 ax.plot(grid, d5, linewidth=2, label="2023/24")
 
@@ -96,4 +88,5 @@ fig.text(
 )
 
 plt.tight_layout()
-plt.show()
+
+plt.savefig(output_dir, dpi=600, bbox_inches="tight")

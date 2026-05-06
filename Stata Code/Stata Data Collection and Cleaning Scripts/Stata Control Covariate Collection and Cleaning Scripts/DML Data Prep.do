@@ -65,7 +65,7 @@
 				ag_plot_formal_rights_hh ///
 				income_shock food_shock price_shock ///
 				head_maritial_status head_age head_sex member adult_member ///
-				state wave hhid ///
+				state wave hhid lender_group ///
 				probability_moderately_insecure FCS_index ///
 				internet_access phone_access farming_loan_total_amount ///
 				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha /// 

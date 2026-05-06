@@ -15,6 +15,8 @@
 #      Determine the number of avialable cores your CPU has
 #   3. Set re_estimate_nuisance=False (default) to reuse cached nuisance predictions,
 #      or True to force re-fitting from scratch.
+#   4. Choose if you would like heterogenous treatment effect (HTE=True) 
+#      or if you would like quartile analysis HTE_GATE=True
 #
 # PIPELINE STAGES:
 #   Stage 1 — Generate master household-level folds (shared across all outcomes)
@@ -49,11 +51,13 @@ from sklearn.dummy import DummyRegressor
 import sys
 import re
 from datetime import datetime
+import statsmodels.api as sm
 
 #custom imports from other scripts in this project
 from fold_generator import fold_generator
 from helper_functions import translate_folds, align_to_subsample
 from nuisance_function_residual_est import estimate_loan_nuisance, estimate_outcome_nuisance
+from learners import make_ml_m_loan_clf
 
 # ============================================================
 # OUTPUT LOGGING
@@ -101,17 +105,17 @@ print("=" * 80, flush=True)
 k_fold_vector = [5]
 
 #number of repetitions NOTE: paper results use N_REP=30; start with 5 for runtime checks
-N_REP = 30
+N_REP = 5
 
 #parallel workers, in general the speed of the analysis should grow roughly 
 #linearly with the number of works for large rep runs
-N_WORKERS = 6
+N_WORKERS = 4
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
 re_estimate_nuisance = False
 
 #set as True if you want to calculate HTEs
-HTE = False
+HTE = True
 
 #for the group average treatment effects (GATE), this is another way of estimating HTE, set GATE=True
 #NOTE: it is not neccessary, but should be mutually exclusive with the general HTE flag 
@@ -162,9 +166,9 @@ explicit_x = [
     "non_farming_loan",                 #has a non-farming loan (controls for general credit access)
 ]
 
-#set learner based on length of control vector
-from learners import make_ml_m_loan_clf
+#set learner based on length of control vector (used in polynomial L1 logit)
 clf = make_ml_m_loan_clf(n_core=len(explicit_x))
+
 # ============================================================
 # LOAD DATA
 # ============================================================
@@ -244,7 +248,8 @@ loan_hat_by_K, base_keys_by_K = estimate_loan_nuisance(
     X_base, loan_true_base, base_keys,
     fold_hhids_by_K, k_fold_vector, N_REP, N_WORKERS,
     re_estimate=re_estimate_nuisance,
-    cache_dir=cache_dir
+    cache_dir=cache_dir,
+    clf=clf
 )
 
 # ============================================================
@@ -335,13 +340,6 @@ for y_col in outcome_vars:
             [df_clean[[y_col, time_col, unit_col, "loan", "hhid_cluster"]].reset_index(drop=True),
             X_cre.reset_index(drop=True)],
             axis=1
-        )
-
-    #setting the groups for the groups average treatment effects estimate
-    if HTE_GATE == True:
-        gate_groups = pd.DataFrame(
-            pd.qcut(df_clean[S_col], q=4, labels=["Q1","Q2","Q3","Q4"]).astype(str).reset_index(drop=True), #setting quartiles     
-            columns=["farm_size_quartile"]
         )
     
     # ---- STAGE 3A: OUTCOME NUISANCE ESTIMATION ----
@@ -471,11 +469,39 @@ for y_col in outcome_vars:
         #so we have to follow a more utilitarian approach but due to storing predictions
         #prior to fitting, this is not computationally intensive
         if HTE_GATE == True:
-            #just set to ATE for gate analysis
-            d_cols_vec = ["loan"]
-            print("\n>>> GATE by Farm Size Quartile:")
-            gate_obj = plr.gate(groups=gate_groups)
-            print(gate_obj.confint())
+            df_clean["farm_size_quartile"] = pd.qcut(df_clean["w_farm_size_agland"], q=4, labels=["Q1","Q2","Q3","Q4"])
+    
+            #align quartile to data_for_dml_plr rows
+            quartile_aligned = df_clean["farm_size_quartile"].reset_index(drop=True).values
+            
+            y_true = data_for_dml_plr[y_col].values
+            d_true = data_for_dml_plr["loan"].values.astype(float)
+            
+            print("\n>>> GATEs by Farm Size Quartile:")
+            for size_g in ["Q1", "Q2", "Q3", "Q4"]:
+                #mask to identify quartiles
+                mask = (quartile_aligned == size_g)
+                
+                #number of treated in each Q                
+                n_treated = int(d_true[mask].sum())
+                n_total   = int(mask.sum())
+
+                gate_reps, se_reps = [], []
+                for rep in range(N_REP):
+                    #manually compute residuals then run OLS
+                    y_resid = y_true - outcome_hat_by_K[K][:, rep]
+                    d_resid = d_true - loan_hat_aligned[:, rep]
+                    y_g, d_g = y_resid[mask], sm.add_constant(d_resid[mask])
+                    ols = sm.OLS(y_g, d_g).fit(cov_type="cluster", cov_kwds={"groups": data_for_dml_plr["hhid_cluster"].values[mask]})
+                    gate_reps.append(ols.params[1])   #coefficient on D_tilde
+                    se_reps.append(ols.bse[1])
+
+                #simple average over each rep
+                gate   = np.mean(gate_reps)
+                se     = np.mean(se_reps)        
+                tstat  = gate / se
+                print(f"  {size_g}: coef={gate:.4f}  SE={se:.4f}  t={tstat:.2f}  Treated={n_treated}  Total={n_total}", flush=True)
+            
         
         # ---- OUTPUT: LEARNER DIAGNOSTICS ----
         #prints out diagnostic statistics into output log

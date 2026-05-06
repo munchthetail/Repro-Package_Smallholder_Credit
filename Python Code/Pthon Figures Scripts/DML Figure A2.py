@@ -1,9 +1,14 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.stats import gaussian_kde  # Required for manual density calculation
+from pathlib import Path
+
+#setting paths
+root       = Path(__file__).resolve().parent.parent.parent
+output_dir = root / "Tables and Figures" / "Figure_A2.png"
+dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 mpl.rcParams.update({
     "font.family": "serif",
@@ -18,64 +23,44 @@ mpl.rcParams.update({
 
 mpl.rcParams["text.usetex"] = False
 
-# Load Data
-df = pd.read_stata(
-    r"C:/Users/Will/OneDrive - The Ohio State University/RA/Data/DML Cleaned Data.dta"
-)
+#load data
+df = pd.read_stata(dta_path)
 df = df.dropna(subset=["w_farm_size_agland"])
 df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
 
 fig, ax = plt.subplots(figsize=(8, 4.5))
 
-# --- Helper Function for Corrected Reflection KDE ---
+#KDE helper function for cutting off at zero
 def plot_corrected_reflection_kde(data, ax, color, label, linestyle="-"):
-    """
-    1. Mirrors data to fix boundary bias at 0.
-    2. Calculates KDE.
-    3. Multiplies Density by 2 to correct for the doubled sample size.
-    """
-    # 1. Mirror the data
+
+    #mirror the data
     reflected_data = np.concatenate([data, -data])
     
-    # 2. Calculate KDE using scipy
-    # bw_method='scott' is standard; you can adjust the scalar to smooth/sharpen
+    #KDE using scipy
     kde = gaussian_kde(reflected_data, bw_method='scott') 
-    
-    # Create a grid of x values starting strictly from 0
     x_grid = np.linspace(0, data.max() * 1.1, 1000)
-    
-    # 3. Evaluate and Multiply by 2
     y_vals = kde(x_grid) * 2 
     
-    # Plot
+    #plot
     ax.plot(x_grid, y_vals, color=color, label=label, linestyle=linestyle, linewidth=2)
 
-# --- Plotting ---
-
-# 2. Households WITH Loans (Blue)
+#HH w/ loans
 plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 1, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 1, "w_farm_size_agland"], 
     ax, 
     color="tab:blue", 
-    label="Households with Informal Loan Loans"
+    label="Households with Agricultural Loans"
 )
 
-# 3. Households WITHOUT Loans (Orange)
+#HHs w/o loans
 plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 2, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 0, "w_farm_size_agland"], 
     ax, 
     color="tab:orange", 
-    label="Households with Semi-Formal Loans"
+    label="Households without Agricultural Loans"
 )
 
-# 1. All Households (Gray, Dashed)
-plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 3, "w_farm_size_agland"], 
-    ax, 
-    color="green", 
-    label="Households with Formal Loan"
-)
-
+#all HHs
 plot_corrected_reflection_kde(
     df["w_farm_size_agland"], 
     ax, 
@@ -87,8 +72,8 @@ plot_corrected_reflection_kde(
 ax.set_xlim(left=0)
 ax.set_xlabel("Farm Size (hectares)")
 ax.set_ylabel("Density")
-ax.set_title("Kernel Density: Distribution of Farm Size by Agricultural Loan Formality")
+ax.set_title("Kernel Density: Distribution of Farm Size")
 ax.legend(frameon=False)
 
 plt.tight_layout()
-plt.show()
+plt.savefig(output_dir, dpi=600, bbox_inches="tight")
