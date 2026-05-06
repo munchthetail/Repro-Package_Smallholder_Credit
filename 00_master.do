@@ -30,7 +30,7 @@ ssc install winsor2, replace
 //---------------------------------------------------------------------------
 
 //2.10 Import household variables (internally calls Import Wave 4 & Wave 5) and post cleaning
-do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Import Post Cleaning.do"
+do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Import Post Cleaning.do"
 
 //---------------------------------------------------------------------------
 //Subsection 2.11: R — FIES index (must run before Food Security)
@@ -38,22 +38,22 @@ do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Import Post C
 shell "${Rscript}" "${root}/R Code/FIES Index Calculation.r"
 
 //2.2 Food security indices (FIES, FCS)
-do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Food Security.do"
+do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Food Security.do"
 
 //2.3 Shocks
-do "`base'/Stata Control Covariate Collection and Cleaning Scripts/Shocks Pull.do"
+do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Shocks Pull.do"
 
 //2.4 Standalone expenditure components
-do "`base'/Stata Expenditure Calculations Scripts/Exp Labor Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Exp Land Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Exp Livestock Expenses.do"
-do "`base'/Stata Expenditure Calculations Scripts/Exp Input Expenses.do"
+do "${base}/Stata Expenditure Calculations Scripts/Exp Labor Expenses.do"
+do "${base}/Stata Expenditure Calculations Scripts/Exp Land Expenses.do"
+do "${base}/Stata Expenditure Calculations Scripts/Exp Livestock Expenses.do"
+do "${base}/Stata Expenditure Calculations Scripts/Exp Input Expenses.do"
 
 //2.5 Consumption expenditures (internally calls W4 and W5 sub-scripts)
-do "`base'/Stata Expenditure Calculations Scripts/Exp Master Pulls.do"
+do "${base}/Stata Expenditure Calculations Scripts/Exp Master Pulls.do"
 
 //2.6 Merge everything into DML-ready dataset
-do "`base'/Stata Control Covariate Collection and Cleaning Scripts/DML Data Prep.do"
+do "${base}/Stata Control Covariate Collection and Cleaning Scripts/DML Data Prep.do"
 
 //3 Output tables
-do "`base'/Stata Output Tables Scripts/Balance Table.do"
+do "${base}/Stata Output Tables Scripts/Balance Table.do"
