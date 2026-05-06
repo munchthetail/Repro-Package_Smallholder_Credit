@@ -169,7 +169,7 @@ use "${root}/Source Data/Nigeria GHS Wave 4/Raw DTA files/sect1_harvestw4.dta", 
 	
 	//FINAL SECTION: this merges on all the other datasets we've created
 	merge m:1 hhid using `head_flag', gen(m1)
-		//keep if m1==3
+		keep if m1==3
 		drop m1
 		
 	merge m:1 hhid using `phone_type', gen(m1)
