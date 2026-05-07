@@ -1,1 +1,0 @@
-ln_gen_consumption_flag;FCS_index_AND_head_maritial_status_AND_probability_moderately_insecure;loan;0.13356074352887098;0.6385748824620366;20.626804516615024;1.0603253841400146

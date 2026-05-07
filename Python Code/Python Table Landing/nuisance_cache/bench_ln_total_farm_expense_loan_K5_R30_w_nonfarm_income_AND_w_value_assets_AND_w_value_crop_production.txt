@@ -1,1 +1,0 @@
-ln_total_farm_expense;w_nonfarm_income_AND_w_value_assets_AND_w_value_crop_production;loan;0.16475313602552316;1.2808268762716382;20.113724679967223;1.8445895910263062

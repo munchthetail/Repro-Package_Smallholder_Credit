@@ -1,1 +1,0 @@
-ln_gen_consumption_flag;w_nonfarm_income_AND_w_value_assets_AND_w_value_crop_production;loan_x_size;-0.020157595084643997;0.6754438897601494;9.443855530503821;1.0603253841400146

@@ -1,1 +1,0 @@
-ln_gen_consumption_flag;head_age_AND_head_sex_AND_member;loan_x_size;-0.02365972739478831;0.6244300469720404;9.453664329987692;1.0603253841400146

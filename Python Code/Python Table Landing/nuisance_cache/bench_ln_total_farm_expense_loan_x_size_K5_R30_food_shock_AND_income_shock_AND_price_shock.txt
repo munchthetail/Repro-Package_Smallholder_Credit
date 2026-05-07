@@ -1,1 +1,0 @@
-ln_total_farm_expense;food_shock_AND_income_shock_AND_price_shock;loan_x_size;0.08138857998511556;1.2029825652519006;8.966951524137093;1.8445895910263062
