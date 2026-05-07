@@ -9,6 +9,7 @@ scripts = [
     "DML Figure A1.py",
     "DML Figure A2.py",
     "DML Figure A3.py",
+    "DML Summary Statistics.py",
 ]
 
 for script in scripts:

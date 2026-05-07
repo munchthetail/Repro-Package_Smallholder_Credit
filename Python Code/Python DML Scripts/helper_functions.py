@@ -5,7 +5,6 @@ import pandas as pd
 from joblib import Parallel, delayed
 from sklearn.base import clone
 
-
 # ============================================================
 # CROSS-FITTING (rep-level parallelism)
 # ============================================================
@@ -140,7 +139,8 @@ def compute_benchmark_cf(base, short):
     r2_short = 1.0 - (short["sigma2"] / base["var_y"])  #same var y denominator
     c_y      = (r2_long - r2_short) / (1.0 - r2_long)
     r2_alpha = short["nu2"] / base["nu2"]
-    c_d      = (1.0 - r2_alpha) / r2_alpha
+    c_d = (1.0 - r2_alpha) / r2_alpha if r2_alpha > 0 else np.nan
+    c_d = c_d if (not np.isnan(c_d) and c_d >= 0) else np.nan
     denom_sq = (short["sigma2"] - base["sigma2"]) * (base["nu2"] - short["nu2"])
     rho = float(np.clip((short["theta"] - base["theta"]) / np.sqrt(denom_sq), -1, 1)) \
           if denom_sq > 0 else np.nan

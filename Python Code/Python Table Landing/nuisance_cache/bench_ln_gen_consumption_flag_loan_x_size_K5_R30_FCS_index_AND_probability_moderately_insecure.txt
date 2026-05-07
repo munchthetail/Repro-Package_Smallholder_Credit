@@ -1,1 +1,1 @@
-ln_gen_consumption_flag;FCS_index_AND_probability_moderately_insecure;loan_x_size;-0.014303733413712402;0.6394930400908618;9.966991368633506;1.0603253841400146
+ln_gen_consumption_flag;FCS_index_AND_probability_moderately_insecure;loan_x_size;-0.018144792943289197;0.6394783572728685;9.442643336666151;1.0603253841400146

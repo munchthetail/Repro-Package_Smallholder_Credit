@@ -1,30 +1,25 @@
 # DML Identification.py 
 # THIS IS THE AVERAGE TREATMENT EFFECT (ATE) ESTIMATION SCRIPT
+# NOTE: THIS SCRIPT BY NECCESSITY HAS TO RETRAIN LEARNERS OVER MANY ITERNATIONS AND
+#       IS HIGHLY COMPUTATIONALLY INTENSIVE. IT CAN OFTEN TAKE OVER 24 HOURS TO RUN ON 6 CORES
 # =============================================================================
-# Core DML estimation script. Runs the partial linear regression model for each
-# outcome variable using nuisance function predictions calculated independently 
-# we do this so we can have unique learner ensembles for treatment and outcome to
-# maximize predictive performance
-# additionally, externalizing the nuisance estimation allows us to parallelize at the 
-# rep level and cache predictions to speed up high rep run and reruns sensitivity analyses.
+# Then sensitivity to OVB script. Runs the partial linear regression model for each
+# core outcome variables, dropping different numbers of controls, 
+# we do this to estimate the potential impact of OVB proxied by observables 
 #
 # HOW TO USE:
-#   1. Set "outcome_vars" to the variables you want to estimate.
-#   2. Set k_fold_vector, N_REP, N_WORKERS to match the desired specification and hardware limitations.
+#   1. Set k_fold_vector, N_REP, N_WORKERS to match the desired specification and hardware limitations.
 #      Paper results use K=5, N_REP=30. Start with N_REP=5 to test timing.
 #      Determine the number of avialable cores your CPU has
-#   3. Set re_estimate_nuisance=False (default) to reuse cached nuisance predictions,
+#   2. Set re_estimate_nuisance=False (default) to reuse cached nuisance predictions,
 #      or True to force re-fitting from scratch.
+#   3. choose which variabels you would like to test in bench_set
 #
 # PIPELINE STAGES:
 #   Stage 1 — Generate master household-level folds (shared across all outcomes)
 #   Stage 2 — Estimate loan propensity on full base sample (once, cached)
-#   Stage 3 — For each outcome:
-#               a. Subset, clean, impute, build CREs
-#               b. Estimate outcome learner (cached per outcome)
-#               c. Match loan predictions to outcome subsample
-#               d. Run DML PLR with both nuisances (plugged in from prior calculations)
-#               e. Print estimates and learner diagnostics
+#   Stage 3 — For each outcome, we loop over estimates using different controls sets
+#               recording the impact on learner performance and estimating OVB confidence intervals
 
 #thread limits must come before any numpy/sklearn imports to prevent CPU oversubscription
 import os
@@ -89,10 +84,6 @@ re_estimate_nuisance = False
 #set as True if you want to calculate HTEs
 HTE = True
 d_cols_vec = ["loan", "loan_x_size"] if HTE else ["loan"]
-
-#for the group average treatment effects (GATE), this is another way of estimating HTE, set GATE=True
-#NOTE: it is not neccessary, but should be mutually exclusive with the general HTE flag 
-HTE_GATE = False
 
 #these are used throughout the script: treatment, time, and unit column names
 d_col, time_col, unit_col = "any_arv_farm_loan", "wave", "hhid"
@@ -169,7 +160,6 @@ bench_set = [
     "w_nonfarm_income"],
     "ag_plot_formal_rights_hh"    
 ]
-
 
 # ============================================================
 # LOAD DATA
@@ -339,13 +329,6 @@ for drops in bench_set:
                 X_cre.reset_index(drop=True)],
                 axis=1
             )
-
-        #setting the groups for the groups average treatment effects estimate
-        if HTE_GATE == True:
-            gate_groups = pd.DataFrame(
-                pd.qcut(df_clean[S_col], q=4, labels=["Q1","Q2","Q3","Q4"]).astype(str).reset_index(drop=True), #setting quartiles     
-                columns=["farm_size_quartile"]
-            )
         
         # ---- STAGE 3A: OUTCOME NUISANCE ESTIMATION ----
         #estimate outcome learner for the specific outcome subsample
@@ -381,8 +364,8 @@ for drops in bench_set:
             )
             
             #making an array for HTE farm size residuals
-            col_farm_size = df_clean["loan_x_size"].to_numpy()
-            loan_x_size_hat_aligned = loan_hat_aligned*col_farm_size[:, None]
+            S_centered = (df_clean[S_col] - df_clean[S_col].mean()).to_numpy()
+            loan_x_size_hat_aligned = loan_hat_aligned*S_centered[:,None]
             
             # ---- BUILD SMPLS FOR DOUBLEML ----
             #translate households in subsample to the master hhid folds by rep and fold specification
@@ -454,33 +437,39 @@ for drops in bench_set:
             plr.fit(store_predictions=True, external_predictions=external_predictions)
 
             # ---- OUTPUT: MAIN RESULTS ----
-            # sigma2 and nu2 are averaged across reps; shape is (1, N_REP, n_treatments)
+            #stores sample outcome varaince, residual variances (outcome/treatment), and treatment effects by (benchmark, outcome, fold spec)
             var_y = float(np.var(data_for_dml_plr[y_col].values, ddof=0))
             for d_idx, d_name in enumerate(d_cols_vec):
-                theta_hat  = float(np.asarray(plr.coef).reshape(-1)[d_idx])
-                sigma2_hat = float(np.mean(np.asarray(plr.sensitivity_elements["sigma2"])[0, :, d_idx]))
-                nu2_hat    = float(np.mean(np.asarray(plr.sensitivity_elements["nu2"])[0, :, d_idx]))
-                print(f"    [{d_name}] theta={theta_hat:.4f}  sigma2={sigma2_hat:.4f}  nu2={nu2_hat:.4f}")
+                theta_hat  = float(np.asarray(plr.coef).reshape(-1)[d_idx]) #treatment effects
+                sigma2_hat = float(np.mean(np.asarray(plr.sensitivity_elements["sigma2"])[0, :, d_idx])) #outcome residual variance
+                nu2_hat    = float(np.mean(np.asarray(plr.sensitivity_elements["nu2"])[0, :, d_idx])) #treatment residual variance
+                print(f"    [{d_name}] theta={theta_hat:.4f}  sigma2={sigma2_hat:.4f}  nu2={nu2_hat:.4f}") #store in a .txt for later
                 save_bench_values(K, N_REP, y_col, drops, d_name, theta_hat, sigma2_hat, nu2_hat, var_y, cache_dir=cache_dir)
 
 # ============================================================
 # SAVING BENCHMARK DATA TO CSV
 # ============================================================
+#collects sample outcome varaince, residual variances (outcome/treatment), and treatment effects by (benchmark, outcome, fold spec)
+#follows closely from https://docs.doubleml.org/stable/guide/sensitivity.html
+ci_rows = []
 for K in k_fold_vector:
     for y_col in outcome_vars:
         for d_name in d_cols_vec:
 
+            #grab baseline values where we didn't drop anything
             base = load_bench_values(K, N_REP, y_col, drop="", d_name=d_name, cache_dir=cache_dir)
 
-            rows = []
             for drop in bench_set:
-                
+                #loops over all benchmark output and compares it to baseline i.e. base
                 short = load_bench_values(K, N_REP, y_col, drop=drop, d_name=d_name, cache_dir=cache_dir)
                 cf    = compute_benchmark_cf(base, short)
                 product = cf["c_y"] * cf["c_d"] * base["sigma2"] * base["nu2"]
                 bias_adv = np.sqrt(product) if product >= 0 else np.nan
                 bias_emp = abs(cf["rho"]) * bias_adv if (not np.isnan(cf["rho"]) and not np.isnan(bias_adv)) else np.nan
-                rows.append({
+                ci_rows.append({
+                    "outcome":           y_col,
+                    "treatment":         d_name,
+                    "K":                 K,
                     "dropped":           safe_drop_label(drop),
                     "theta":             base["theta"],
                     "sigma2":            short["sigma2"] if drop != "" else base["sigma2"],
@@ -497,31 +486,5 @@ for K in k_fold_vector:
                     "bound_upper_adv":   base["theta"] + bias_adv,
                     "bound_lower_emp":   base["theta"] - bias_emp,
                     "bound_upper_emp":   base["theta"] + bias_emp,
-                })
-
-
-            y_safe = y_col.replace("/","_").replace(" ","_")
-            pd.DataFrame(rows).to_csv(output_dir / f"benchmark_{y_safe}_{d_name}_K{K}_R{N_REP}.csv", index=False)
-
-ci_rows = []
-for K in k_fold_vector:
-    for y_col in outcome_vars:
-        for d_name in d_cols_vec:
-            base = load_bench_values(K, N_REP, y_col, drop="", d_name=d_name, cache_dir=cache_dir)
-            for drop in bench_set:
-                short = load_bench_values(K, N_REP, y_col, drop=drop, d_name=d_name, cache_dir=cache_dir)
-                cf = compute_benchmark_cf(base, short)
-                product = cf["c_y"] * cf["c_d"] * base["sigma2"] * base["nu2"]
-                bias_adv = np.sqrt(product) if product >= 0 else np.nan
-                bias_emp = abs(cf["rho"]) * bias_adv if not np.isnan(cf.get("rho", np.nan)) and not np.isnan(bias_adv) else np.nan
-                ci_rows.append({
-                    "outcome": y_col, "treatment": d_name, "K": K,
-                    "dropped_variable":      safe_drop_label(drop),
-                    "theta":                 base["theta"],
-                    "rho":                   cf["rho"],
-                    "ci_lower_conservative": base["theta"] - bias_adv,
-                    "ci_upper_conservative": base["theta"] + bias_adv,
-                    "ci_lower_empirical":    base["theta"] - bias_emp,
-                    "ci_upper_empirical":    base["theta"] + bias_emp,
                 })
 pd.DataFrame(ci_rows).to_csv(output_dir / f"benchmark_CI_K{k_fold_vector[0]}_R{N_REP}.csv", index=False)

@@ -6,7 +6,7 @@ from pathlib import Path
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Python Code" / "Python Figure Landing" / "quartile_summary_anova.csv"
+output_dir = root / "Tables and Figures" / "quartile_summary_anova.csv"
 dta_path = root / "Tables and Figures" / "DML Cleaned Data.dta"
 
 #load data

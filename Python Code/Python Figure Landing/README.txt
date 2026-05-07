@@ -1,1 +1,0 @@
-This is the landing page for Figures created by the python script.
