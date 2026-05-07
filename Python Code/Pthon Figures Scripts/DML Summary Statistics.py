@@ -7,7 +7,7 @@ from pathlib import Path
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
 output_dir = root / "Tables and Figures" / "quartile_summary_anova.csv"
-dta_path = root / "Tables and Figures" / "DML Cleaned Data.dta"
+dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 #load data
 df = pd.read_stata(dta_path)
