@@ -1,1 +1,0 @@
-This is the landing page for Tables created by the stata script.
