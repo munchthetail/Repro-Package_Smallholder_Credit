@@ -1,0 +1,1 @@
+ln_gen_consumption_flag;food_shock_AND_income_shock_AND_price_shock;loan;0.13104527808794567;0.6207575922153726;20.643711793839877;1.0603253841400146

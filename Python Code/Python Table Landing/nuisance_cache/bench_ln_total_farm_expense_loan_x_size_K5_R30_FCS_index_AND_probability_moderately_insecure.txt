@@ -1,0 +1,1 @@
+ln_total_farm_expense;FCS_index_AND_probability_moderately_insecure;loan_x_size;0.07847536692034661;1.2057919196825362;9.429789145386449;1.8445895910263062

@@ -1,0 +1,1 @@
+ln_gen_consumption_flag;FCS_index_AND_probability_moderately_insecure;loan;0.1342629688515998;0.6386324538952086;20.62598313242563;1.0603253841400146

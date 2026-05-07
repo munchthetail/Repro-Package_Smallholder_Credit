@@ -1,0 +1,1 @@
+ln_total_farm_expense;FCS_index_AND_head_maritial_status_AND_probability_moderately_insecure;loan;0.12816961796391238;1.205233258753575;20.164285034013652;1.8445895910263062
