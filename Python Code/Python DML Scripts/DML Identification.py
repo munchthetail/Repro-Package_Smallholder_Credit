@@ -65,7 +65,7 @@ from learners import make_ml_m_loan_clf
 #setting paths, root should automatically fill at the base level of the reproduction folder
 #if root is not working, then set the root to the base level of the repdoduction of the folder
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Python Code" / "Python Table Landing"
+output_dir = root / "Tables and Figures"
 output_dir.mkdir(parents=True, exist_ok=True)
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 cache_dir = output_dir / "nuisance_cache"
@@ -105,14 +105,14 @@ print("=" * 80, flush=True)
 k_fold_vector = [5]
 
 #number of repetitions NOTE: paper results use N_REP=30; start with 5 for runtime checks
-N_REP = 5
+N_REP = 30
 
 #parallel workers, in general the speed of the analysis should grow roughly 
 #linearly with the number of works for large rep runs
-N_WORKERS = 4
+N_WORKERS = 6
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
-re_estimate_nuisance = False
+re_estimate_nuisance = True
 
 #set as True if you want to calculate HTEs
 HTE = True
@@ -131,11 +131,11 @@ d_col, time_col, unit_col = "any_arv_farm_loan", "wave", "hhid"
 #default for the ATE would be the core_outcomes
 farm_exp_vector    = ["ln_total_input_exp", "ln_land_total_exp",
                       "ln_labor_expense_total", "ln_animal_total_exp", "ln_total_fert_kg_ha"]
-consumption_vector = ["ln_gen_consumption_flag", "ln_food_flag", "ln_non_food_gen_consumption"]
+consumption_vector = ["ln_food_flag", "ln_non_food_gen_consumption"]
 core_outcomes      = ["ln_gen_consumption_flag", "ln_total_farm_expense"]
 
 # --- CHOOSE OUTCOMES TO RUN ---
-outcome_vars = core_outcomes
+outcome_vars = core_outcomes + farm_exp_vector + consumption_vector 
 
 # ============================================================
 # CONTROL VARIABLES
@@ -380,7 +380,7 @@ for y_col in outcome_vars:
         )
         
         #making an array for HTE farm size residuals
-        col_farm_size = df_clean["loan_x_size"].to_numpy()
+        col_farm_size = (df_clean[S_col]-df_clean[S_col].mean()).to_numpy()
         loan_x_size_hat_aligned = loan_hat_aligned*col_farm_size[:, None]
         
         #vector of treatment variable(s)

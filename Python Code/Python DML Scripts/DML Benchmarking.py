@@ -79,7 +79,7 @@ N_REP = 30
 N_WORKERS = 6
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
-re_estimate_nuisance = False
+re_estimate_nuisance = True
 
 #set as True if you want to calculate HTEs
 HTE = True
@@ -459,6 +459,10 @@ for K in k_fold_vector:
             #grab baseline values where we didn't drop anything
             base = load_bench_values(K, N_REP, y_col, drop="", d_name=d_name, cache_dir=cache_dir)
 
+            #
+            if d_name == "loan_x_size":
+                base_ate = load_bench_values(K, N_REP, y_col, drop="", d_name="loan", cache_dir=cache_dir)
+            
             for drop in bench_set:
                 #loops over all benchmark output and compares it to baseline i.e. base
                 short = load_bench_values(K, N_REP, y_col, drop=drop, d_name=d_name, cache_dir=cache_dir)

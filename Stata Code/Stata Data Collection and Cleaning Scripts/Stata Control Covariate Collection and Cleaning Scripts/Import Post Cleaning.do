@@ -107,6 +107,15 @@
 		merge m:1 hhid wave using `farming_loan_approv', nogen
 	
 	//got a nonfarming loan indicator
-	gen non_farming_loan = (loan_reason > 1 & loan_reason!=.)
+	preserve
+		gen non_farming_loan = (loan_reason > 1 & loan_reason!=.)
+		collapse (max) non_farming_loan, by(hhid wave)
+		
+		tempfile non_farming_loan_approv
+		save `non_farming_loan_approv', replace
+	restore
+
+	merge m:1 hhid wave using `non_farming_loan_approv', nogen
 	
+	//saving
 	save "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", replace
