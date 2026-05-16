@@ -53,7 +53,7 @@ from learners import make_ml_m_loan_clf
 #setting paths, root should automatically fill at the base level of the reproduction folder
 #if root is not working, then set the root to the base level of the repdoduction of the folder
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Python Code" / "Python Table Landing"
+output_dir = root / "Tables and Figures"
 output_dir.mkdir(parents=True, exist_ok=True)
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 cache_dir = output_dir / "nuisance_cache"

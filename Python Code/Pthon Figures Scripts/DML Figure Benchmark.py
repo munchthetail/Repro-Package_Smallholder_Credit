@@ -12,7 +12,7 @@ import matplotlib as mpl
 #paths
 root       = Path(__file__).resolve().parent.parent.parent
 OUTPUT_DIR = root / "Tables and Figures"
-csv_path = root / "Python Code" / "Python Table Landing"
+csv_path = root / "Tables and Figures"
 
 mpl.rcParams.update({
     "font.family": "serif",
