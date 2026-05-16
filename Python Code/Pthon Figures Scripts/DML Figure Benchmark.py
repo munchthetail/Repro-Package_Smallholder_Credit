@@ -298,5 +298,5 @@ fig.text(0.5, 0.895, "Estimated via Observed Variable Benchmarking bounds",
 
 plt.tight_layout(rect=[0, 0, 1, 0.93])
 
-out_path = OUTPUT_DIR / f"sensitivity_forest_plot_K{K}_Rep{N_REP}.png"
+out_path = OUTPUT_DIR / f"sensitivity_forest_plot_K{K}_Rep{N_REP}.pdf"
 plt.savefig(out_path, dpi=600, bbox_inches="tight", facecolor="white")

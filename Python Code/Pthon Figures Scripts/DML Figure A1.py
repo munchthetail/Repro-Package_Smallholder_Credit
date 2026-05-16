@@ -6,7 +6,7 @@ from pathlib import Path
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Tables and Figures" / "Figure_A1.png"
+output_dir = root / "Tables and Figures" / "Figure_A1.pdf"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 #cosmetic settings
