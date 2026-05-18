@@ -7,3 +7,6 @@
 bench_*
 *.pyc
 DML Identification_v1*
+*.tex
+*.xlsx
+*[0-9].pdf
