@@ -12,11 +12,13 @@
 global root "`c(pwd)'"
 global base "${root}/Stata Code/Stata Data Collection and Cleaning Scripts"
 
-//this is used to run the rscript automatically
+//this is used to run the rscript automatically but depends on your system PATH settings
 //if the Rscript is not on PATH, replace with full path, e.g.:
     //global Rscript "C:/Program Files/R/R-4.4.1/bin/Rscript.exe"
 
 global Rscript "Rscript"
+
+//if you cannot make this work, then manually run the Rscript and comment out section 2.11 below
 
 //---------------------------------------------------------------------------
 //Section 1: Install Stata packages
