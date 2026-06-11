@@ -2,6 +2,9 @@
 # THIS IS THE AVERAGE TREATMENT EFFECT (ATE) ESTIMATION SCRIPT
 # NOTE: THIS SCRIPT BY NECCESSITY HAS TO RETRAIN LEARNERS OVER MANY ITERNATIONS AND
 #       IS HIGHLY COMPUTATIONALLY INTENSIVE. IT CAN OFTEN TAKE OVER 24 HOURS TO RUN ON 6 CORES
+# NOTE: we take the headline results, meaning the baseline treatment effects from 4.1 for ATE
+#       and the HTEs by farm size from 4.2, but we just take ATE from the specification (lines ~390 to 420)without HTE
+#       and only take the HTE from the joint estimation (lines ~420 to 450).
 # =============================================================================
 # Then sensitivity to OVB script. Runs the partial linear regression model for each
 # core outcome variables, dropping different numbers of controls, 
@@ -441,7 +444,7 @@ for drops in bench_set:
                     b1_reps.append(float(ols.params[2]))                   #interaction coefficient only
                     sigma2_reps.append(float(np.mean(ols.resid**2)))      #joint outcome residual variance
                     #partial the constant and the loan residual out of the interaction (FWL)
-                    dx_perp = sm.OLS(dx_resid, sm.add_constant(d_resid)).fit().resid
+                    dx_perp = sm.OLS(dx_resid, sm.add_constant(d_resid)).fit().resid #partialling out is the right thing to do, but it kills variance
                     nu2_reps.append(1.0 / float(np.mean(dx_perp**2)))
 
                 theta_hat  = float(np.median(b1_reps))                     #interaction effect (median over reps)

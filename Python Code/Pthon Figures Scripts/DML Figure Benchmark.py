@@ -151,6 +151,10 @@ bench_set_sorted = sorted(cols_to_plot, key=avg_abs_delta)
 #just keeping the top 6
 bench_set_sorted = bench_set_sorted[-6:]
 
+#I want to show the fertilizer OVB too --- FERT is pretty invariant to OVB by this metric
+target = "FCS_index_AND_probability_moderately_insecure"
+bench_set_sorted = [bench_set_sorted[0], target] + [c for c in bench_set_sorted if c not in {bench_set_sorted[0], target}]
+
 # ================================
 # PLOT
 # ================================
@@ -284,7 +288,7 @@ ax.grid(axis="x", color="#AAAAAA", linewidth=1.5, zorder=0)
 ax.legend(
     handles=legend_elements,
     loc="upper left",
-    bbox_to_anchor=(0.70, 0.99),
+    bbox_to_anchor=(0.10, 0.99),
     bbox_transform=ax.transAxes,
     fontsize=12, framealpha=0.92, edgecolor="#CCCCCC",
     borderpad=0.7, labelspacing=0.5
