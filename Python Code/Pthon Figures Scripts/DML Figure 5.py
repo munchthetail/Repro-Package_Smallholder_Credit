@@ -1,5 +1,4 @@
 #%%
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,12 +30,12 @@ df = df.drop(columns=["w_farm_size_agland"], errors="ignore")  #avoid a merge co
 df = df.merge(size, on=["hhid", "wave"], how="inner")
 df = df.dropna(subset=["DML_residuals", "TWFE_residuals", "w_farm_size_agland"])
 
-#per-observation difference (pooled over both waves)
+#per-observation difference pooled over both waves
 df["resid_diff"] = np.abs(df["DML_residuals"] - df["TWFE_residuals"])
 
 xcol = "w_farm_size_agland"
 
-#grid for the fitted curves; trim the far-right tail so the view stays readable (no rows dropped)
+#grid for the fitted curves trim the far right
 xmax = np.quantile(df[xcol], 0.99) * 1.05
 xg   = np.linspace(0.0, xmax, 400)
 
@@ -47,7 +46,7 @@ print("SD(|difference|)   =", round(df["resid_diff"].std(),     4))
 print("Var(|difference|)   =", round(df["resid_diff"].var(),     4))
 print("Mean(|difference|)   =", round(df["resid_diff"].mean(),     4))
 
-#design style copied from DML Figure 2 / 3
+#design style
 mpl.rcParams.update({
     "font.family": "serif",
     "font.serif": ["CMU Serif", "Computer Modern Roman", "DejaVu Serif"],
@@ -57,7 +56,7 @@ mpl.rcParams.update({
 })
 mpl.rcParams["text.usetex"] = False
 
-#scatter one pooled series + its basic 3rd-degree (cubic) fit
+#scatter one pooled series + its basic 3 degree  fit
 def plot_series(ax, y, color, label):
     ax.scatter(df[xcol], y, s=10, alpha=0.25, color=color, edgecolor="none")
     p = Polynomial.fit(df[xcol], y, 3)
@@ -73,7 +72,7 @@ def plot_series(ax, y, color, label):
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), sharex=True)
 
-#top: pooled residuals, DML vs TWFE on a shared axis
+#top panel pooled residuals
 plot_series(ax1, df["DML_residuals"],  "tab:blue",   "DML")
 plot_series(ax1, df["TWFE_residuals"], "tab:orange", "TWFE")
 ax1.set_title("Pooled Logged Fertilizer Utilization Residuals: DML vs TWFE")

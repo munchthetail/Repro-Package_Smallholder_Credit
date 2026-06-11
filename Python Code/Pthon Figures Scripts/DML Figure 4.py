@@ -1,8 +1,6 @@
 #%%
 
 #NOTE: SEE doi:10.1093/pan/mpi014 for a clear rundown of the confidence bound math
-
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
