@@ -4,7 +4,7 @@ from pathlib import Path
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Tables and Figures" / "quartile_summary.csv"
+output_dir = root / "Tables and Figures" / "quartile_summary_wave.csv"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 #load data
@@ -55,10 +55,9 @@ for v in dependent_variables + ["farming_loan_total_amount"]:
 
 #build quartiles
 df = df.copy()
-df["farm_q"] = pd.qcut(df["w_farm_size_agland"], q=4, labels=[1,2,3,4], duplicates="drop")
 
 #ordered categorical
-df["farm_q"] = pd.Categorical(df["farm_q"], categories=[1,2,3,4], ordered=True)
+df["wave_label"] = df["wave"].map({4: "Wave 4", 5: "Wave 5"})
 
 #means
 def aggregate_means(
@@ -82,7 +81,7 @@ def aggregate_means(
 def quartile_summary_table(
     data: pd.DataFrame,
     vars_list: list,
-    q: str = "farm_q",
+    q: str = "wave_label",
     label_map: dict | None = None,
     decimals: int = 3
 ) -> pd.DataFrame:
@@ -107,10 +106,8 @@ def quartile_summary_table(
         row = {
             "Variable": label_map.get(v, v) if label_map else v,
             "N": n_total,
-            "Mean Q1 (smallest)": means.get(1, np.nan),
-            "Mean Q2": means.get(2, np.nan),
-            "Mean Q3": means.get(3, np.nan),
-            "Mean Q4 (largest)": means.get(4, np.nan),
+            "Wave 4": means.get("Wave 4", np.nan),
+            "Wave 5": means.get("Wave 5", np.nan),
             "Mean Overall": mean_full,
             "Min": np.nanmin(data[v]),
             "Max": np.nanmax(data[v]),
@@ -120,14 +117,14 @@ def quartile_summary_table(
     out = pd.DataFrame(rows)
 
     #formatting
-    num_cols = ["Mean Q1 (smallest)", "Mean Q2", "Mean Q3", "Mean Q4 (largest)", "Mean Overall"]
+    num_cols = ["Wave 4", "Wave 5", "Mean Overall"]
     out[num_cols] = out[num_cols].astype(float).round(decimals)
     return out
 
 #make summary table
 all_vars = independent_variables + dependent_variables
 
-summary_df = quartile_summary_table(df, all_vars, q="farm_q", decimals=3)
+summary_df = quartile_summary_table(df, all_vars, q="wave_label", decimals=3)
 
 #nice print
 with pd.option_context("display.max_rows", 200, "display.max_columns", 20, "display.width", 200):

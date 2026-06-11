@@ -4,7 +4,7 @@ from pathlib import Path
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Tables and Figures" / "quartile_summary.csv"
+output_dir = root / "Tables and Figures" / "quartile_summary_quartile_w5.csv"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 #load data
@@ -13,6 +13,8 @@ df = pd.read_stata(dta_path)
 
 #removing households with only one observation    
 df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
+df = df[df["wave"] == 5].copy()
+
 
 independent_variables = [
     "any_arv_farm_loan",

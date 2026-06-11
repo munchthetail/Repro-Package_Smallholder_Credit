@@ -26,6 +26,7 @@ global Rscript "Rscript"
 ssc install univar,    replace
 ssc install ietoolkit, replace
 ssc install winsor2, replace
+ssc install reghdfe, replace
 
 //---------------------------------------------------------------------------
 //Section 2: Stata data pipeline
@@ -58,4 +59,9 @@ do "${base}/Stata Expenditure Calculations Scripts/Exp Master Pulls.do"
 do "${base}/Stata Control Covariate Collection and Cleaning Scripts/DML Data Prep.do"
 
 //3 Output tables
+
+//3.1 Balance table
 do "${base}/Stata Output Tables Scripts/Balance Table.do"
+
+//3.2 TWFE Tables
+do "${base}/Stata Output Tables Scripts/TWFE Robustness Check.do"

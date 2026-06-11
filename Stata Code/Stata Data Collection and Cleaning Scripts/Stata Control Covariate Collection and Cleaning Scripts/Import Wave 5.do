@@ -75,7 +75,7 @@ use "${root}/Source Data/Nigeria GHS Wave 5/Raw DTA files/sect1_harvestw5.dta", 
 	save `head_demo'
 
 //pulling income data FROM EPAR
-	use "${root}/Source Data/Nigeria GHS Wave 5/final_data/Nigeria_GHS_W5_household_variables.dta", clear
+	use "${root}/Source Data/Nigeria GHS Wave 5/epar_data/Nigeria_GHS_W5_household_variables.dta", clear
 
 	//keeping income variables 
 		keep hhid ag_hh w_nonfarm_income w_value_assets formal_land_rights_hh w_npk_rate w_org_fert_rate w_inorg_fert_rate /// 

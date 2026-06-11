@@ -21,9 +21,6 @@ mpl.rcParams.update({
     "ytick.labelsize": 10,
 })
 
-mpl.rcParams["text.usetex"] = False
-print("usetex:", mpl.rcParams["text.usetex"])
-
 #KDE settings
 def silverman_bandwidth(x: np.ndarray) -> float:
     x = x[np.isfinite(x)]
@@ -76,16 +73,6 @@ ax.set_xlabel("Probability of Being Moderately Food Insecure")
 ax.set_ylabel("Density")
 ax.set_title("Kernel Density: Probability of Being Moderately Food Insecure (FIES)")
 ax.legend(frameon=False)
-
-fig.text(
-    0.075,
-    -0.01,
-    "Note: Sample restricted to balanced households across waves.",
-    ha="left",
-    va="top",
-    fontsize=9,
-    wrap=True
-)
 
 plt.tight_layout()
 

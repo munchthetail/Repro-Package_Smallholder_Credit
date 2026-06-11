@@ -23,7 +23,7 @@ mpl.rcParams.update({
 K     = 5
 N_REP = 30
 
-outcome_vars = ["ln_gen_consumption_flag", "ln_total_farm_expense"]
+outcome_vars = ["ln_gen_consumption_flag", "ln_total_farm_expense", "ln_total_fert_kg_ha"]
 
 #labels for table
 drop_labels = {
@@ -52,13 +52,13 @@ drop_labels = {
 series_labels = {
     ("ln_gen_consumption_flag", "loan"): "Log nonfarm expenditures (ATE)",
     ("ln_total_farm_expense", "loan"):   "Log farm expenditures (ATE)",
-    ("ln_total_farm_expense", "loan_x_size"):   "Log farm expenditures (HTE)"
+    ("ln_total_fert_kg_ha", "loan_x_size"):     "Log fertilizer expenditures (ATE)"
 }
 
 COLORS = {
     ("ln_gen_consumption_flag", "loan"): "#185FA5",
     ("ln_total_farm_expense", "loan"):   "#B45609",
-    ("ln_total_farm_expense", "loan_x_size"):   "#B48609",
+    ("ln_total_fert_kg_ha", "loan_x_size"):   "#B48609",
 }
 
 # ================================
@@ -101,7 +101,7 @@ for df in dfs.values():
 all_cols = ["__base__"] + sorted(all_cols - {"__base__"})
 
 series = [(y_col, d_name) for y_col in outcome_vars for d_name in ["loan", "loan_x_size"]
-          if not (y_col == "ln_gen_consumption_flag" and d_name == "loan_x_size")]
+          if not ((y_col in {"ln_total_farm_expense", "ln_gen_consumption_flag"} and d_name == "loan_x_size") or (y_col == "ln_total_fert_kg_ha" and d_name == "loan"))]
 n_series = len(series)
 
 #building rows
@@ -142,7 +142,7 @@ def avg_abs_delta(col):
     deltas = [
         abs(r["delta_theta"])
         for r in rows
-        if r["drop_lbl"] == col and r["d_name"] == "loan" and not np.isnan(r["delta_theta"])
+        if r["drop_lbl"] == col and not np.isnan(r["delta_theta"])
     ]
     return np.mean(deltas) if deltas else np.inf
 

@@ -30,6 +30,8 @@
 
 #thread limits must come before any numpy/sklearn imports to prevent CPU oversubscription
 import os
+
+from scipy import stats
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -112,7 +114,7 @@ N_REP = 30
 N_WORKERS = 6
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
-re_estimate_nuisance = True
+re_estimate_nuisance = False
 
 #set as True if you want to calculate HTEs
 HTE = True
@@ -329,19 +331,12 @@ for y_col in outcome_vars:
     df_clean = df_clean.drop(columns=["S_centered"])
     
     #assemble the full DML dataset (outcome + treatment + ids + X) (conditional on ATE vs HTE)
-    if HTE == True:
-        data_for_dml_plr = pd.concat(
-            [df_clean[[y_col, time_col, unit_col, "loan", "loan_x_size", "hhid_cluster"]].reset_index(drop=True),
-            X_cre.reset_index(drop=True)],
-            axis=1
-        )
-    else:
-        data_for_dml_plr = pd.concat(
-            [df_clean[[y_col, time_col, unit_col, "loan", "hhid_cluster"]].reset_index(drop=True),
-            X_cre.reset_index(drop=True)],
-            axis=1
-        )
-    
+    data_for_dml_plr = pd.concat(
+        [df_clean[[y_col, time_col, unit_col, "loan", "hhid_cluster"]].reset_index(drop=True),
+        X_cre.reset_index(drop=True)],
+        axis=1
+    )
+
     # ---- STAGE 3A: OUTCOME NUISANCE ESTIMATION ----
     #estimate outcome learner for the specific outcome subsample
     #outcome_keys is used to match predictions to original values for residual estimation
@@ -379,15 +374,8 @@ for y_col in outcome_vars:
             df_clean[[unit_col, time_col]]
         )
         
-        #making an array for HTE farm size residuals
-        col_farm_size = (df_clean[S_col]-df_clean[S_col].mean()).to_numpy()
-        loan_x_size_hat_aligned = loan_hat_aligned*col_farm_size[:, None]
-        
-        #vector of treatment variable(s)
-        if HTE == True:
-            d_cols_vec = ["loan", "loan_x_size"]
-        else:
-            d_cols_vec = ["loan"]
+        #vector of treatment variable
+        d_cols_vec = ["loan"]
 
         
         # ---- BUILD SMPLS FOR DOUBLEML ----
@@ -437,23 +425,12 @@ for y_col in outcome_vars:
         # ---- EXTERNAL PREDICTIONS ----
         #pass both nuisance predictions into DoubleML directly
         #DoubleML computes residuals
-        if HTE == True:
-            external_predictions = {
-                "loan": {
-                    "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
-                    "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
-                },
-                "loan_x_size": {
-                    "ml_l": outcome_hat_by_K[K],
-                    "ml_m": loan_x_size_hat_aligned}  #interaction term
+        external_predictions = {
+            "loan": {
+                "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
+                "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
             }
-        else:
-            external_predictions = {
-                "loan": {
-                    "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
-                    "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
-                }
-            }
+        }
         #this is the actual fit function
         #since the learners have already been estimated this 
         #just computes residuals and runs the final OLS stage
@@ -464,6 +441,85 @@ for y_col in outcome_vars:
         print("\n>>> DML Estimates:")
         print(plr.summary)
 
+        # ---- OUTPUT: HETEROGENEOUS TREATMENT EFFECTS ----
+        #we can't do this exactly with the canned functions because of how we set up catching
+        #so we set up the partialled out regression here and manually loop through reps to get stable effects & SEs
+        #NOTE: when this was writen CATE arugement in canned DML function could not handle multiple repetitions but as of DoubleML 0.11.3 it can
+            #it would be best to simplify the code to use the canned function
+        if HTE == True:
+            print("\n>>> Joint partialled-out regression (main + interaction):")
+            
+            col_farm_size = (df_clean[S_col] - df_clean[S_col].mean())           
+            y_true = data_for_dml_plr[y_col].values
+            d_true = data_for_dml_plr["loan"].values.astype(float) 
+            groups = data_for_dml_plr["hhid_cluster"].values
+            b0r, se0r, b1r, se1r, cov01r = [], [], [], [], []
+            for rep in range(N_REP):
+                y_resid  = y_true - outcome_hat_by_K[K][:, rep]
+                d_resid  = d_true - loan_hat_aligned[:, rep]
+                dx_resid = d_resid * col_farm_size          #interaction term
+                Xmat = sm.add_constant(np.column_stack([d_resid, dx_resid]))
+                ols  = sm.OLS(y_resid, Xmat).fit(cov_type="cluster",
+                                                 cov_kwds={"groups": groups})
+                b0r.append(ols.params[1]); se0r.append(ols.bse[1])   #store ATE
+                b1r.append(ols.params[2]); se1r.append(ols.bse[2])   #store HTE
+                cov01r.append(ols.cov_params()[1, 2])   #use this for the tipping point chart
+                
+            #follding from Chernozhukov 2018 median of estimators
+            b0r, se0r = np.asarray(b0r), np.asarray(se0r)
+            b1r, se1r = np.asarray(b1r), np.asarray(se1r)
+            cov01r = np.asarray(cov01r)
+            
+            #median point estimate, median-adjusted SE
+            b0  = np.median(b0r)
+            b1  = np.median(b1r)
+            se0_adj = np.sqrt(np.median(se0r**2 + (b0r - b0)**2))   #adjusted (parentheses)
+            se1_adj = np.sqrt(np.median(se1r**2 + (b1r - b1)**2))
+            z0 = b0 / se0_adj
+            z1 = b1 / se1_adj
+            p0 = 2 * stats.norm.sf(abs(z0))   # two-sided normal p-value
+            p1 = 2 * stats.norm.sf(abs(z1))
+
+            print(f"  loan (at mean size): coef={b0:.6f}  SE_adj={se0_adj:.4f}  [P-value={p0:.4f}]  z={z0:.2f}")
+            print(f"  loan_x_size        : coef={b1:.6f}  SE_adj={se1_adj:.4f}  [P-value={p1:.4f}]  z={z1:.2f}")
+
+            #breakeven calcaultion
+            if y_col == "ln_gen_consumption_flag":
+                nonfarm_coef = b0
+                cov01r_adj = np.median(cov01r)
+                np.savetxt(cache_dir / "hte_gen_consumption.csv", np.array([[b0, se0_adj, b1, se1_adj, cov01r_adj]]), delimiter=",")
+                
+            if y_col == "ln_total_farm_expense" and nonfarm_coef is not None:
+                cov01r_adj = np.median(cov01r)
+                np.savetxt(cache_dir / "hte_farm_expense.csv", np.array([[b0, se0_adj, b1, se1_adj, cov01r_adj]]), delimiter=",")
+                
+                A_star = (nonfarm_coef - b0)/b1 + df_clean[S_col].mean() #breakeven farm size where treatment effect changes sign
+                print("\n>>> Breakeven Calculation:")
+                print(f"  Breakeven farm size (where treatment effect changes sign): {A_star:.4f} hectares")
+
+                farm_size = df_clean[S_col].to_numpy()
+                pct = stats.percentileofscore(farm_size, A_star, kind="weak")
+                print(f"  A* = {A_star:.4f} ha  ->  {pct:.1f}th percentile (N={len(farm_size)})")
+        
+        #saving the residuals for another figure
+        if y_col == "ln_total_farm_expense":
+            outcome_hat_by_K_export = np.median(outcome_hat_by_K[K], axis=1)
+            residuals_df = df_clean[[y_col, "wave", "w_farm_size_agland", "hhid"]].copy()
+            residuals_df["DML_residuals"] = residuals_df["ln_total_farm_expense"] - outcome_hat_by_K_export
+            residuals_df.to_csv(cache_dir / "DML_farm_residuals.csv", index=False)
+
+        if y_col == "ln_gen_consumption_flag":
+            outcome_hat_by_K_export = np.median(outcome_hat_by_K[K], axis=1)
+            residuals_df = df_clean[[y_col, "wave", "w_farm_size_agland", "hhid"]].copy()
+            residuals_df["DML_residuals"] = residuals_df["ln_gen_consumption_flag"] - outcome_hat_by_K_export
+            residuals_df.to_csv(cache_dir / "DML_con_residuals.csv", index=False)
+        
+        if y_col == "ln_total_fert_kg_ha":
+            outcome_hat_by_K_export = np.median(outcome_hat_by_K[K], axis=1)
+            residuals_df = df_clean[[y_col, "wave", "w_farm_size_agland", "hhid"]].copy()
+            residuals_df["DML_residuals"] = residuals_df["ln_total_fert_kg_ha"] - outcome_hat_by_K_export
+            residuals_df.to_csv(cache_dir / "DML_fert_residuals.csv", index=False)
+        
         #prints GATE if the option is collected
         #the canned GATE function from DoubleML doesn't allow rep>1
         #so we have to follow a more utilitarian approach but due to storing predictions
@@ -495,12 +551,14 @@ for y_col in outcome_vars:
                     ols = sm.OLS(y_g, d_g).fit(cov_type="cluster", cov_kwds={"groups": data_for_dml_plr["hhid_cluster"].values[mask]})
                     gate_reps.append(ols.params[1])   #coefficient on D_tilde
                     se_reps.append(ols.bse[1])
-
+        
                 #simple average over each rep
-                gate   = np.mean(gate_reps)
-                se     = np.mean(se_reps)        
-                tstat  = gate / se
-                print(f"  {size_g}: coef={gate:.4f}  SE={se:.4f}  t={tstat:.2f}  Treated={n_treated}  Total={n_total}", flush=True)
+                gate_reps, se_reps = np.asarray(gate_reps), np.asarray(se_reps)
+                gate    = np.median(gate_reps)
+                se_adj  = np.sqrt(np.median(se_reps**2 + (gate_reps - gate)**2))
+                se_med  = np.median(se_reps)
+                tstat   = gate / se_adj
+                print(f"  {size_g}: coef={gate:.4f}  SE_adj={se_adj:.4f}  [SE_med={se_med:.4f}]  t={tstat:.2f}  Treated={n_treated}  Total={n_total}", flush=True)
             
         
         # ---- OUTPUT: LEARNER DIAGNOSTICS ----

@@ -50,7 +50,7 @@ plot_corrected_reflection_kde(
     df.loc[df["lender_group"] == 1, "w_farm_size_agland"], 
     ax, 
     color="tab:blue", 
-    label="Households with Informal Loan Loans"
+    label="Households with Informal Loan(s)"
 )
 
 #HH w semi-formal loans
@@ -58,7 +58,7 @@ plot_corrected_reflection_kde(
     df.loc[df["lender_group"] == 2, "w_farm_size_agland"], 
     ax, 
     color="tab:orange", 
-    label="Households with Semi-Formal Loans"
+    label="Households with Semi-Formal Loan(s)"
 )
 
 #HHs w/ formal laons
@@ -66,7 +66,7 @@ plot_corrected_reflection_kde(
     df.loc[df["lender_group"] == 3, "w_farm_size_agland"], 
     ax, 
     color="green", 
-    label="Households with Formal Loan"
+    label="Households with Formal Loan(s)"
 )
 
 #all HHs

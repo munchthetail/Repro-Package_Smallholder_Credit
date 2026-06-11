@@ -1,7 +1,6 @@
 *.dta
 *.csv
 *.parquet
-*.pyc
 *.npy
 *.png
 bench_*

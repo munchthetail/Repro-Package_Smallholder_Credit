@@ -37,6 +37,7 @@ warnings.simplefilter(action='ignore', category=DeprecationWarning)
 import pandas as pd
 from pathlib import Path
 import numpy as np
+import statsmodels.api as sm
 from doubleml import DoubleMLPLR
 from doubleml.data import DoubleMLClusterData
 from sklearn.dummy import DummyRegressor
@@ -79,7 +80,7 @@ N_REP = 30
 N_WORKERS = 6
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
-re_estimate_nuisance = True
+re_estimate_nuisance = False
 
 #set as True if you want to calculate HTEs
 HTE = True
@@ -93,7 +94,7 @@ d_col, time_col, unit_col = "any_arv_farm_loan", "wave", "hhid"
 # ============================================================
 #these cover the three main outcome vectors
 #default for the ATE would be the core_outcomes
-core_outcomes      = ["ln_gen_consumption_flag", "ln_total_farm_expense"]
+core_outcomes      = ["ln_gen_consumption_flag", "ln_total_farm_expense", "ln_total_fert_kg_ha"]
 
 # --- CHOOSE OUTCOMES TO RUN ---
 outcome_vars = core_outcomes
@@ -148,6 +149,7 @@ bench_set = [
     "head_age",
     "head_sex",
     "member",
+    "adult_member", 
     ["head_age",
     "head_sex",
     "member"],
@@ -158,7 +160,9 @@ bench_set = [
     ["w_value_crop_production",
     "w_value_assets",
     "w_nonfarm_income"],
-    "ag_plot_formal_rights_hh"    
+    "ag_plot_formal_rights_hh",
+    "w_farm_size_agland",  
+    "non_farming_loan",     
 ]
 
 # ============================================================
@@ -349,9 +353,10 @@ for drops in bench_set:
         # ==========================================
         # INNER LOOP OVER FOLD SPECIFICATIONS
         # ==========================================
-        #from this point on the computational load is very light, we just take the predicted 
-        #values/probabilities from stage 2 and 3 and plug them into the DML function
-        #for treatment effects and canned diagnositic statistics
+        #from this point on the computational load is very light, we just take the predicted
+        #values/probabilities from stage 2 and 3 and plug them into (a) the DoubleML baseline ATE
+        #model for the loan effect and (b) the joint partialled-out regression for the interaction,
+        #recording treatment effects and the OVB sensitivity elements for each
         for K in k_fold_vector:
             
             # ---- STAGE 3B: ALIGN LOAN HAT TO THIS OUTCOME'S SUBSAMPLE ----
@@ -363,41 +368,36 @@ for drops in bench_set:
                 df_clean[[unit_col, time_col]]
             )
             
-            #making an array for HTE farm size residuals
-            S_centered = (df_clean[S_col] - df_clean[S_col].mean()).to_numpy()
-            loan_x_size_hat_aligned = loan_hat_aligned*S_centered[:,None]
-            
-            # ---- BUILD SMPLS FOR DOUBLEML ----
-            #translate households in subsample to the master hhid folds by rep and fold specification
+            # ---- STAGE 3C: BASELINE ATE (DoubleML single-treatment "loan") ----
+            #the average treatment effect and its OVB sensitivity elements come from the baseline
+            #(non-interacted) partialling-out model, exactly as the headline ATE in "DML Identification.py".
+            #with use_other_treat_as_covariate=False + external predictions the loan estimate is univariate,
+            #so this reproduces the original benchmark's loan rows.
+            var_y = float(np.var(data_for_dml_plr[y_col].values, ddof=0))
+
+            #build smpls + cluster-level fold info required by DoubleMLClusterData
+            #DoubleML needs to know which households (clusters) are in each train/test split
             hh_obs = data_for_dml_plr[unit_col].to_numpy()
             smpls  = translate_folds(fold_hhids_by_K[K], hh_obs, N_REP)
-
-            #build cluster-level fold info required by DoubleMLClusterData
-            #DoubleML needs to know which households (clusters) are in each train/test split
             smpls_cluster = []
-            for rep_folds in smpls: #loop through folds by rep
+            for rep_folds in smpls:
                 rep_cluster = []
                 for tr, te in rep_folds:
-                    rep_cluster.append([ #creates a list of household id's to use for clustering based on training or testing fold assignment
+                    rep_cluster.append([
                         [np.unique(data_for_dml_plr.loc[tr, "hhid_cluster"])],
                         [np.unique(data_for_dml_plr.loc[te, "hhid_cluster"])]
                     ])
                 smpls_cluster.append(rep_cluster)
 
-            # ---- DOUBLEML SETUP ----
-            #both ml_l and ml_m are overridden by external predictions
-            #DummyRegressor is a required placeholder, it is never actually fitted
+            #both ml_l and ml_m are overridden by external predictions; DummyRegressor is never fitted
             dml_data = DoubleMLClusterData(
                 data_for_dml_plr,
                 y_col=y_col,
-                d_cols=d_cols_vec,
+                d_cols=["loan"],                #single treatment: the ATE baseline model
                 cluster_cols=cluster_cols,
                 x_cols=X_cre_cols,
                 use_other_treat_as_covariate=False
             )
-
-            #NOTE: DoubleMLPLR has a parallel argument on the fold level, 
-                #we instead parallelize at the rep level
             plr = DoubleMLPLR(
                 dml_data,
                 ml_l=DummyRegressor(strategy="mean"),  #placeholder for external predictions
@@ -405,46 +405,50 @@ for drops in bench_set:
                 n_folds=K,
                 n_rep=N_REP,
                 score="partialling out",
-                draw_sample_splitting=False  #use the master folds manually below
+                draw_sample_splitting=False     #use the master folds manually below
             )
-
-            #using the pre-built fold assignments
             plr.set_sample_splitting(smpls, smpls_cluster)
-
-            # ---- EXTERNAL PREDICTIONS ----
-            #pass both nuisance predictions into DoubleML directly
-            #DoubleML computes residuals
-            if HTE == True:
-                external_predictions = {
-                    "loan": {
-                        "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
-                        "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
-                    },
-                    "loan_x_size": {
-                        "ml_l": outcome_hat_by_K[K],
-                        "ml_m": loan_x_size_hat_aligned}  #interaction term
+            plr.fit(store_predictions=True, external_predictions={
+                "loan": {
+                    "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
+                    "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
                 }
-            else:
-                external_predictions = {
-                    "loan": {
-                        "ml_l": outcome_hat_by_K[K],  #E[Y|X] — (n_outcome, N_REP)
-                        "ml_m": loan_hat_aligned,      #E[loan|X] — (n_outcome, N_REP)
-                    }
-                }
-            #this is the actual fit function
-            #since the learners have already been estimated this 
-            #just computes residuals and runs the final OLS stage
-            plr.fit(store_predictions=True, external_predictions=external_predictions)
+            })
 
-            # ---- OUTPUT: MAIN RESULTS ----
-            #stores sample outcome varaince, residual variances (outcome/treatment), and treatment effects by (benchmark, outcome, fold spec)
-            var_y = float(np.var(data_for_dml_plr[y_col].values, ddof=0))
-            for d_idx, d_name in enumerate(d_cols_vec):
-                theta_hat  = float(np.asarray(plr.coef).reshape(-1)[d_idx]) #treatment effects
-                sigma2_hat = float(np.mean(np.asarray(plr.sensitivity_elements["sigma2"])[0, :, d_idx])) #outcome residual variance
-                nu2_hat    = float(np.mean(np.asarray(plr.sensitivity_elements["nu2"])[0, :, d_idx])) #treatment residual variance
-                print(f"    [{d_name}] theta={theta_hat:.4f}  sigma2={sigma2_hat:.4f}  nu2={nu2_hat:.4f}") #store in a .txt for later
-                save_bench_values(K, N_REP, y_col, drops, d_name, theta_hat, sigma2_hat, nu2_hat, var_y, cache_dir=cache_dir)
+            theta_hat  = float(np.asarray(plr.coef).reshape(-1)[0])                                  #ATE
+            sigma2_hat = float(np.mean(np.asarray(plr.sensitivity_elements["sigma2"])[0, :, 0]))     #outcome residual variance
+            nu2_hat    = float(np.mean(np.asarray(plr.sensitivity_elements["nu2"])[0, :, 0]))        #treatment residual variance
+            print(f"    [loan] theta={theta_hat:.4f}  sigma2={sigma2_hat:.4f}  nu2={nu2_hat:.4f}")
+            save_bench_values(K, N_REP, y_col, drops, "loan", theta_hat, sigma2_hat, nu2_hat, var_y, cache_dir=cache_dir)
+
+            # ---- STAGE 3D: INTERACTION (HTE) via joint partialled-out regression ----
+            #ONLY the interaction coefficient is taken from the joint regression of the residualized
+            #outcome on the residualized treatment and treatment x (centered farm size), as in
+            #"DML Identification.py". its OVB sensitivity elements come from this same joint model:
+            #sigma2 is the joint outcome residual variance, and nu2 = 1/E[dx_perp^2] uses the interaction
+            #residual after partialling out the constant and the loan residual (Frisch-Waugh-Lovell).
+            if HTE:
+                col_farm_size = (df_clean[S_col] - df_clean[S_col].mean()).to_numpy()
+                y_true = data_for_dml_plr[y_col].values
+                d_true = data_for_dml_plr["loan"].values.astype(float)
+
+                b1_reps, sigma2_reps, nu2_reps = [], [], []
+                for rep in range(N_REP):
+                    y_resid  = y_true - outcome_hat_by_K[K][:, rep]
+                    d_resid  = d_true - loan_hat_aligned[:, rep]
+                    dx_resid = d_resid * col_farm_size                     #interaction residual
+                    ols = sm.OLS(y_resid, sm.add_constant(np.column_stack([d_resid, dx_resid]))).fit()
+                    b1_reps.append(float(ols.params[2]))                   #interaction coefficient only
+                    sigma2_reps.append(float(np.mean(ols.resid**2)))      #joint outcome residual variance
+                    #partial the constant and the loan residual out of the interaction (FWL)
+                    dx_perp = sm.OLS(dx_resid, sm.add_constant(d_resid)).fit().resid
+                    nu2_reps.append(1.0 / float(np.mean(dx_perp**2)))
+
+                theta_hat  = float(np.median(b1_reps))                     #interaction effect (median over reps)
+                sigma2_hat = float(np.mean(sigma2_reps))
+                nu2_hat    = float(np.mean(nu2_reps))
+                print(f"    [loan_x_size] theta={theta_hat:.4f}  sigma2={sigma2_hat:.4f}  nu2={nu2_hat:.4f}")
+                save_bench_values(K, N_REP, y_col, drops, "loan_x_size", theta_hat, sigma2_hat, nu2_hat, var_y, cache_dir=cache_dir)
 
 # ============================================================
 # SAVING BENCHMARK DATA TO CSV

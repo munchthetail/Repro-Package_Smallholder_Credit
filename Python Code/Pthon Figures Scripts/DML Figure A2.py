@@ -49,7 +49,7 @@ plot_corrected_reflection_kde(
     df.loc[df["any_arv_farm_loan"] == 1, "w_farm_size_agland"], 
     ax, 
     color="tab:blue", 
-    label="Households with Agricultural Loans"
+    label="Households with Agricultural Loan(s)"
 )
 
 #HHs w/o loans
@@ -57,7 +57,7 @@ plot_corrected_reflection_kde(
     df.loc[df["any_arv_farm_loan"] == 0, "w_farm_size_agland"], 
     ax, 
     color="tab:orange", 
-    label="Households without Agricultural Loans"
+    label="Households without Agricultural Loan(s)"
 )
 
 #all HHs
