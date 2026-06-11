@@ -1,3 +1,6 @@
+#data for these figures requires outout from 
+#DML Identification for total farm, total nonfarm, and fertilizer utilization to run
+
 import subprocess
 import sys
 from pathlib import Path
@@ -6,14 +9,11 @@ root        = Path(__file__).resolve().parent
 figures_dir = root / "Python Code" / "Pthon Figures Scripts"
 
 scripts = [
-    "DML Figure A1.py",
-    "DML Figure A2.py",
-    "DML Figure A3.py",
-    "DML Figure A4.py",
-    "DML Summary Statistics.py",
-    "DML Summary Statistics by Wave.py",
-    "DML Summary Statistics by Quartile - Wave 4.py",
-    "DML Summary Statistics by Quartile - Wave 5.py"
+    "DML Figure 2.py",
+    "DML Figure 3.py",
+    "DML Figure 4.py",
+    "DML Figure 5.py",
+    "DML Figure Benchmark.py"
 ]
 
 for script in scripts:

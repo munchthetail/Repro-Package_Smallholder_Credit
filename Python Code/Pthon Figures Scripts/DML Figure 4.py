@@ -1,5 +1,5 @@
-#%%
-
+#this produces the heterogenous marginal effect plot with confidence bands
+#NOTE: DML identification must be run first with total farm and nonfarm expenditures as output
 #NOTE: SEE doi:10.1093/pan/mpi014 for a clear rundown of the confidence bound math
 import pandas as pd
 import numpy as np
@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from scipy.stats import gaussian_kde  # Required for manual density calculation
 from pathlib import Path
+from scipy.stats import norm
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
@@ -16,6 +17,7 @@ dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 con_coef_path = root / "Tables and Figures" / "nuisance_cache" / "hte_gen_consumption.csv"
 exp_coef_path = root / "Tables and Figures" / "nuisance_cache" / "hte_farm_expense.csv"
 
+#loading all the relavent coefficients, variances, and covariance from DML Identification
 con_coef_ate = pd.read_csv(con_coef_path, header=None).iloc[0,0]
 con_var_ate = pd.read_csv(con_coef_path, header=None).iloc[0,1]**2
 
@@ -27,8 +29,6 @@ exp_covar = pd.read_csv(exp_coef_path, header=None).iloc[0,4]
 
 print(con_coef_ate, con_var_ate)
 print(exp_coef_ate, exp_var_ate, exp_coef_hte, exp_var_hte, exp_covar)
-
-#%%
 
 
 df = pd.read_stata(dta_path)
@@ -42,15 +42,14 @@ df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
 #  Reg 2 (general consumption, flat):       tau2    = g
 #  Moderator x = w_farm_size_agland
 # =====================================================================
-from scipy.stats import norm
- 
-# read_csv(...).iloc[i] returns a 1-element Series -> coerce to float
+
+#helper reader to pull stuff out from planned rows, this is not the most consistent way of doing this but works fine enough for this
 def _f(x):
     return float(np.asarray(x, dtype=float).ravel()[0])
  
-b1, vb1 = _f(exp_coef_ate), _f(exp_var_ate)   # Reg 1 ATE  (sig @ 10%)
-b2, vb2 = _f(exp_coef_hte), _f(exp_var_hte)   # Reg 1 HTE  (insignificant slope)
-g,  vg  = _f(con_coef_ate), _f(con_var_ate)   # Reg 2 ATE  (highly significant)
+b1, vb1 = _f(exp_coef_ate), _f(exp_var_ate)   #Reg 1 ATE  
+b2, vb2 = _f(exp_coef_hte), _f(exp_var_hte)   #Reg 1 HTE  
+g,  vg  = _f(con_coef_ate), _f(con_var_ate)   #Reg 2 ATE  
  
 cov_b1_b2 = _f(exp_covar)   # Cov(exp ATE, exp HTE), loaded from row 4
 cov_reg   = 0.0             # cross-model cov (not cached); 0 if models fit separately
@@ -58,25 +57,25 @@ cov_reg   = 0.0             # cross-model cov (not cached); 0 if models fit sepa
 alpha = 0.10                       # 90% bands, matching the 10% framing
 z = norm.ppf(1 - alpha / 2)        # 1.645
  
-# moderator grid from the (farm-size-cleaned, balanced) panel
+#grid farm size
 xv = df["w_farm_size_agland"].to_numpy()
 xv = xv[np.isfinite(xv)]
 xmax = np.quantile(xv, 0.99) * 1.05
 xg = np.linspace(0.0, xmax, 400)
  
-# Reg 1 conditional effect + pointwise SE (Brambor-Clark-Golder)
+#Reg 1 conditional effect + pointwise SE
 mean_size  = df["w_farm_size_agland"].mean()
 xc = xg - mean_size
 tau1 = b1 + b2 * xc
-var1 = vb1 + xc**2 * vb2 + 2.0 * xc * cov_b1_b2
+var1 = vb1 + xc**2 * vb2 + 2.0 * xc * cov_b1_b2 #similar to taylor expansion
 se1  = np.sqrt(np.clip(var1, 0, None))
 lo1, hi1 = tau1 - z * se1, tau1 + z * se1
  
-# Reg 2 flat effect
+#Reg 2 flat effect --- we can plug in the same formula above with the HTE for nonfarm, it is saved with the same naming convension
 tau2 = np.full_like(xc, g)
 lo2, hi2 = g - z * np.sqrt(vg), g + z * np.sqrt(vg)
  
-# difference tau1(x) - g and its band
+#difference tau1(x) - g and its band
 delta = tau1 - g
 Va = vb1 + vg - 2.0 * cov_reg
 Cab = cov_b1_b2
@@ -86,7 +85,6 @@ se_d  = np.sqrt(np.clip(var_d, 0, None))
 lo_d, hi_d = delta - z * se_d, delta + z * se_d
  
 #tipping point + Fieller CI
-#NOTE: we assume coefficient covariance is zero across the two regressions, which simplifies the math a lot
 x_star = (g - b1) / b2 + mean_size
 x_positive = np.interp(0.0, lo1, xg)
 a, bb = b1 - g, b2
