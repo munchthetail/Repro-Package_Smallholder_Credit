@@ -1,7 +1,7 @@
 clear all      // clears data, value labels, saved results, and programs
 set more off   // prevents output from pausing with "more"
 
-use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta"
+use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", clear
 
 //from https://github.com/sergiocorreia/reghdfe#install
 //needed package
@@ -88,12 +88,12 @@ use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta"
 local today = subinstr("$S_DATE"," ","_",.)
 local now   = subinstr("$S_TIME",":","",.)
 
-file open outfile using "C:/Users/Will/Documents/GitHub/2nd-Year-Paper/Tables and Figures/TWFE_coefficients_`today'_`now'.txt", write replace
-//file open outfile using "${root}/Tables and Figures/TWFE_coefficients_`today'_`now'.txt", write replace
+//file open outfile using "C:/Users/Will/Documents/GitHub/2nd-Year-Paper/Tables and Figures/TWFE_coefficients_`today'_`now'.txt", write replace
+file open outfile using "${root}/Tables and Figures/TWFE_coefficients_`today'_`now'.txt", write replace
 file write outfile _n "======================================================================" _n
 file write outfile "RUN: $S_DATE $S_TIME" _n
 file write outfile "======================================================================" _n
-	
+
 //regressions
 	//BASELINE
 		scalar def baseline = 0
@@ -237,6 +237,149 @@ file write outfile "============================================================
 			restore
 			}
 	
+//any loan
+	//BASELINE
+		scalar def baseline = 0
+		
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+			
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+				
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+					
+				reghdfe `v' any_loan centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid) 
+				
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | MODEL: Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_coef outfile 0
+				
+			restore
+			}
+			
+	//HETEROGENIOUS BASELINE EFFECTS
+		scalar def baseline = 1
+		
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+			
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+				
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+					
+				reghdfe `v' any_loan##c.centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid) 
+								
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | MODEL: Heterogeneous Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_coef outfile "`v'" "het_baseline" "any_arv_farm_loan" "loan (at mean size)"
+				store_coef outfile 1
+					
+			restore
+			}
+
+	//HETEROGENIOUS FARM  EFFECTS
+		foreach v of varlist ln_total_input_exp ln_land_total_exp ln_labor_expense_total ln_animal_total_exp ln_total_fert_kg_ha{
+			preserve
+			
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+				
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+					
+				reghdfe `v' any_loan##c.centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid) 
+				
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | MODEL: Heterogeneous Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_coef outfile "`v'" "het_baseline" "any_arv_farm_loan" "loan (at mean size)"
+				store_coef outfile 1
+			
+			restore
+			}
+			
+	//HETEROGENIOUS NONFARM  EFFECTS
+		foreach v of varlist ln_food_flag ln_non_food_gen_consumption{
+			preserve
+			
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+				
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+					
+				reghdfe `v' any_loan##c.centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid) 
+				
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | MODEL: Heterogeneous Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_coef outfile 1
+
+			restore
+			}
+	
 	file close outfile
 	display "Coefficients written to TWFE_coefficients.txt"
 
@@ -263,7 +406,7 @@ file write outfile "============================================================
 			absorb(hhid wave) vce(cluster hhid) residuals(TWFE_residuals)
 		
 		keep hhid wave w_farm_size_agland TWFE_residuals 
-		save "${root}/Stata Code/Stata Data Landing/TWFE_residuals.dta", replace
+		save "${root}/Stata Code/Stata Data Landing/TWFE_farm_residuals.dta", replace
 	restore
 
 //residuals for scatter plot
@@ -289,7 +432,7 @@ file write outfile "============================================================
 			absorb(hhid wave) vce(cluster hhid) residuals(TWFE_residuals)
 		
 		keep hhid wave w_farm_size_agland TWFE_residuals 
-		save "${root}/Stata Code/Stata Data Landing/TWFE_residuals.dta", replace
+		save "${root}/Stata Code/Stata Data Landing/TWFE_con_residuals.dta", replace
 	restore
 
 //residuals for scatter plot
@@ -315,5 +458,5 @@ file write outfile "============================================================
 			absorb(hhid wave) vce(cluster hhid) residuals(TWFE_residuals)
 		
 		keep hhid wave w_farm_size_agland TWFE_residuals 
-		save "${root}/Stata Code/Stata Data Landing/TWFE_residuals.dta", replace
+		save "${root}/Stata Code/Stata Data Landing/TWFE_fert_residuals.dta", replace
 	restore

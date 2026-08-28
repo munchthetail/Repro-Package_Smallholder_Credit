@@ -108,14 +108,28 @@
 	
 	//got a nonfarming loan indicator
 	preserve
-		gen non_farming_loan = (loan_reason > 1 & loan_reason!=.)
-		collapse (max) non_farming_loan, by(hhid wave)
+		gen non_farming_loan = (loan_reason > 1 & loan_reason!=. & loan_status!=0)
+		collapse (max) non_farming_loan  ///
+				 (sum) nonfarming_loan_total_amount=loan_amount_recieved, by(hhid wave)
 		
 		tempfile non_farming_loan_approv
 		save `non_farming_loan_approv', replace
 	restore
 
 	merge m:1 hhid wave using `non_farming_loan_approv', nogen
+
+	//got a nonfarming loan indicator
+	//merging like this shouldn't be neccessary but we could call it defensive
+	preserve
+		gen any_loan = (non_farming_loan | any_arv_farm_loan)
+		collapse (max) any_loan  ///
+				 (sum) total_loan_amount=loan_amount_recieved, by(hhid wave)
+		
+		tempfile any_loan_approv
+		save `any_loan_approv', replace
+	restore
+
+	merge m:1 hhid wave using `any_loan_approv', nogen
 	
 	//saving
 	save "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", replace

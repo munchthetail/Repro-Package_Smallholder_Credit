@@ -137,7 +137,7 @@ consumption_vector = ["ln_food_flag", "ln_non_food_gen_consumption"]
 core_outcomes      = ["ln_gen_consumption_flag", "ln_total_farm_expense"]
 
 # --- CHOOSE OUTCOMES TO RUN ---
-outcome_vars = core_outcomes + farm_exp_vector + consumption_vector 
+outcome_vars = core_outcomes #+ farm_exp_vector + consumption_vector 
 
 # ============================================================
 # CONTROL VARIABLES
@@ -147,7 +147,7 @@ outcome_vars = core_outcomes + farm_exp_vector + consumption_vector
 #the polynomial interaction branch in ml_m_loan_clf (learners.py) assumes this count
 #if you add or remove variables here, update interaction_indices in learners.py to match
 explicit_x = [
-    "w_farm_size_agland",               #farm size
+    "w_farm_size_agland",                     #farm size
     "w_value_crop_production",          #crop output value
     "w_value_assets",                   #household asset value
     "w_nonfarm_income",                 #nonfarm income
@@ -185,6 +185,15 @@ print(f"Loaded {len(farm_exp_data)} observations.", flush=True)
 #folds are defined at the household level before any outcome filtering
 #this guarantees both wave observations for a household are always in the same fold (avoids data leak)
 #and that every outcome uses exactly the same train/test splits for comparability
+
+#copy for merge way down at bottom, used to match observations in tipping point analysis
+#NOTE: this is unrelated with most of the content of the script until the heterogenous treatment effect regression
+df_indicator = farm_exp_data[[unit_col, time_col, "ln_total_farm_expense", "w_farm_size_agland"]].copy()
+df_indicator = df_indicator.dropna(subset=["ln_total_farm_expense", "w_farm_size_agland"]).copy()
+obs_per_hh_indicator = df_indicator.groupby(unit_col)[unit_col].transform("count")
+df_indicator   = df_indicator[obs_per_hh_indicator == 2].copy()
+df_indicator["farm_exp_sample"] = 1
+df_indicator = df_indicator[[unit_col, time_col, "farm_exp_sample"]]
 
 #copying data for fold data
 _base = farm_exp_data[[unit_col, time_col, d_col]].copy()
@@ -500,7 +509,7 @@ for y_col in outcome_vars:
                 farm_size = df_clean[S_col].to_numpy()
                 pct = stats.percentileofscore(farm_size, A_star, kind="weak")
                 print(f"  A* = {A_star:.4f} ha  ->  {pct:.1f}th percentile (N={len(farm_size)})")
-        
+              
         #saving the residuals for another figure
         if y_col == "ln_total_farm_expense":
             outcome_hat_by_K_export = np.median(outcome_hat_by_K[K], axis=1)
@@ -560,7 +569,78 @@ for y_col in outcome_vars:
                 tstat   = gate / se_adj
                 print(f"  {size_g}: coef={gate:.4f}  SE_adj={se_adj:.4f}  [SE_med={se_med:.4f}]  t={tstat:.2f}  Treated={n_treated}  Total={n_total}", flush=True)
             
+        #this second regression stores values for the tipping point chart, reducing the samples to keep them the same across outcomes    
+        if HTE == True and y_col == "ln_gen_consumption_flag":
+            print("\n>>> Joint partialled-out regression (main + interaction) --- REDUCED SAMPLE SIZE FOR TIPPING POINT CALCULATION:")
+            
+            #merging with indicator --- make a mask to select observations later             
+            sample_flag = (
+                data_for_dml_plr[[unit_col, time_col]]
+                .merge(
+                    df_indicator[[unit_col, time_col, "farm_exp_sample"]],
+                    on=[unit_col, time_col],
+                    how="left",
+                    validate="one_to_one",
+                    sort=False
+                )["farm_exp_sample"]
+                .fillna(0)
+                .astype(int)
+                .to_numpy()
+            )
+
+            #mask
+            reduced_mask = sample_flag == 1
+            #reduced objects --- make copies of data to not interfere with later code
+            data_red = data_for_dml_plr.loc[reduced_mask].copy()
+
+            y_true_red = data_red[y_col].values.astype(float)
+            d_true_red = data_red["loan"].values.astype(float)
+            groups_red = data_red["hhid_cluster"].values
+
+            print(f" ============== Rediced Sample Size: (N={len(y_true_red)}) ==============")
         
+            #pulling centered farm size in the same way
+            col_farm_size_red = (data_red[S_col] - data_red[S_col].mean()).values.astype(float)
+
+            #nuisance predictions using the same mask
+            outcome_hat_red = outcome_hat_by_K[K][reduced_mask, :]
+            loan_hat_red = loan_hat_aligned[reduced_mask, :]
+
+            b0r, se0r, b1r, se1r, cov01r = [], [], [], [], []
+            for rep in range(N_REP):
+                y_resid  = y_true_red - outcome_hat_red[:, rep]
+                d_resid  = d_true_red - loan_hat_red[:, rep]
+                dx_resid = d_resid * col_farm_size_red          #interaction term
+                Xmat = sm.add_constant(np.column_stack([d_resid, dx_resid]))
+                ols  = sm.OLS(y_resid, Xmat).fit(cov_type="cluster",
+                                                 cov_kwds={"groups": groups_red})
+                b0r.append(ols.params[1]); se0r.append(ols.bse[1])   #store ATE
+                b1r.append(ols.params[2]); se1r.append(ols.bse[2])   #store HTE
+                cov01r.append(ols.cov_params()[1, 2])   #use this for the tipping point chart
+                
+            #follding from Chernozhukov 2018 median of estimators
+            b0r, se0r = np.asarray(b0r), np.asarray(se0r)
+            b1r, se1r = np.asarray(b1r), np.asarray(se1r)
+            cov01r = np.asarray(cov01r)
+            
+            #median point estimate, median-adjusted SE
+            b0  = np.median(b0r)
+            b1  = np.median(b1r)
+            se0_adj = np.sqrt(np.median(se0r**2 + (b0r - b0)**2))   #adjusted (parentheses)
+            se1_adj = np.sqrt(np.median(se1r**2 + (b1r - b1)**2))
+            z0 = b0 / se0_adj
+            z1 = b1 / se1_adj
+            p0 = 2 * stats.norm.sf(abs(z0))   # two-sided normal p-value
+            p1 = 2 * stats.norm.sf(abs(z1))
+
+            print(f"  loan (at mean size): coef={b0:.6f}  SE_adj={se0_adj:.4f}  [P-value={p0:.4f}]  z={z0:.2f}")
+            print(f"  loan_x_size        : coef={b1:.6f}  SE_adj={se1_adj:.4f}  [P-value={p1:.4f}]  z={z1:.2f}")
+
+            #breakeven calcaultion
+            nonfarm_coef = b0
+            cov01r_adj = np.median(cov01r)
+            np.savetxt(cache_dir / "hte_gen_consumption_reduced_support.csv", np.array([[b0, se0_adj, b1, se1_adj, cov01r_adj]]), delimiter=",")
+            
         # ---- OUTPUT: LEARNER DIAGNOSTICS ----
         #prints out diagnostic statistics into output log
         print("\n>>> Learner Performance:")

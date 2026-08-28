@@ -13,6 +13,7 @@ scripts = [
     "DML Figure 3.py",
     "DML Figure 4.py",
     "DML Figure 5.py",
+    "DML Figure 6.py",
     "DML Figure Benchmark.py"
 ]
 

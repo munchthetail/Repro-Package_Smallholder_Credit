@@ -14,7 +14,7 @@ root       = Path(__file__).resolve().parent.parent.parent
 output_dir = root / "Tables and Figures" / "Figure_A3.pdf"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
-con_coef_path = root / "Tables and Figures" / "nuisance_cache" / "hte_gen_consumption.csv"
+con_coef_path = root / "Tables and Figures" / "nuisance_cache" / "hte_gen_consumption_reduced_support.csv"
 exp_coef_path = root / "Tables and Figures" / "nuisance_cache" / "hte_farm_expense.csv"
 
 #loading all the relavent coefficients, variances, and covariance from DML Identification

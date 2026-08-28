@@ -25,7 +25,7 @@ mpl.rcParams["text.usetex"] = False
 
 #load data
 df = pd.read_stata(dta_path)
-df = df.dropna(subset=["w_farm_size_agland"])
+df = df.dropna(subset=["total_farm_expense"])
 df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
 
 fig, ax = plt.subplots(figsize=(8, 4.5))
@@ -46,7 +46,7 @@ def plot_corrected_reflection_kde(data, ax, color, label, linestyle="-"):
 
 #HH w/ loans
 plot_corrected_reflection_kde(
-    df.loc[df["any_arv_farm_loan"] == 1, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 1, "total_farm_expense"], 
     ax, 
     color="tab:blue", 
     label="Households with Agricultural Loan(s)"
@@ -54,7 +54,7 @@ plot_corrected_reflection_kde(
 
 #HHs w/o loans
 plot_corrected_reflection_kde(
-    df.loc[df["any_arv_farm_loan"] == 0, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 0, "total_farm_expense"], 
     ax, 
     color="tab:orange", 
     label="Households without Agricultural Loan(s)"
@@ -62,7 +62,7 @@ plot_corrected_reflection_kde(
 
 #all HHs
 plot_corrected_reflection_kde(
-    df["w_farm_size_agland"], 
+    df["total_farm_expense"], 
     ax, 
     color="black", 
     label="Full Sample", 
@@ -70,9 +70,9 @@ plot_corrected_reflection_kde(
 )
 
 ax.set_xlim(left=0)
-ax.set_xlabel("Farm Size (hectares)")
+ax.set_xlabel("Total Farm Expense (Millions of Naira)")
 ax.set_ylabel("Density")
-ax.set_title("Kernel Density: Distribution of Farm Size")
+ax.set_title("Kernel Density: Distribution of Total Farm Expense")
 ax.legend(frameon=False)
 
 plt.tight_layout()

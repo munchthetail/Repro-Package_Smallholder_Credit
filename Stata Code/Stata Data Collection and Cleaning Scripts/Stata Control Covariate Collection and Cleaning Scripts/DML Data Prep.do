@@ -4,7 +4,21 @@
 	
 	//general data
 		use "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", clear
-	
+
+		//for pie chart
+		preserve
+			keep if ag_hh==1
+			duplicates tag hhid, gen(tag)
+			drop if tag==0
+			drop tag
+			replace any_loan = 0 if loan_status==0
+
+			keep any_arv_farm_loan non_farming_loan any_loan loan_reason loan_amount_recieved
+
+			save "${root}/Stata Code/Stata Data Landing/Pie Chart Data.dta", replace
+		restore
+
+
 		//droping multiple loans focusing on farming loans
 		duplicates drop hhid wave, force
 		
@@ -68,7 +82,7 @@
 				state wave hhid lender_group ///
 				probability_moderately_insecure FCS_index ///
 				internet_access phone_access farming_loan_total_amount ///
-				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha /// 
+				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha any_loan ///
 	
 	//remove variable labels
 	ds
@@ -76,6 +90,9 @@
 		label variable `v' ""
 	}
 
+	//any loan
+	gen ln_farm_size = log(w_farm_size_agland)
+	
 	//remove value labels (convert labelled numeric vars to pure numeric)
 	foreach v of varlist _all {
 		local lbl : value label `v'

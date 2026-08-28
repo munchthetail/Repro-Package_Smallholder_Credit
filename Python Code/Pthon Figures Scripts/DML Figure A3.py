@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,28 +44,20 @@ def plot_corrected_reflection_kde(data, ax, color, label, linestyle="-"):
     #plot
     ax.plot(x_grid, y_vals, color=color, label=label, linestyle=linestyle, linewidth=2)
 
-#HHs w/ informal loans
+#HH w/ loans
 plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 1, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 1, "w_farm_size_agland"], 
     ax, 
     color="tab:blue", 
-    label="Households with Informal Loan(s)"
+    label="Households with Agricultural Loan(s)"
 )
 
-#HH w semi-formal loans
+#HHs w/o loans
 plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 2, "w_farm_size_agland"], 
+    df.loc[df["any_arv_farm_loan"] == 0, "w_farm_size_agland"], 
     ax, 
     color="tab:orange", 
-    label="Households with Semi-Formal Loan(s)"
-)
-
-#HHs w/ formal laons
-plot_corrected_reflection_kde(
-    df.loc[df["lender_group"] == 3, "w_farm_size_agland"], 
-    ax, 
-    color="green", 
-    label="Households with Formal Loan(s)"
+    label="Households without Agricultural Loan(s)"
 )
 
 #all HHs
@@ -81,7 +72,7 @@ plot_corrected_reflection_kde(
 ax.set_xlim(left=0)
 ax.set_xlabel("Farm Size (hectares)")
 ax.set_ylabel("Density")
-ax.set_title("Kernel Density: Distribution of Farm Size by Agricultural Loan Formality")
+ax.set_title("Kernel Density: Distribution of Farm Size")
 ax.legend(frameon=False)
 
 plt.tight_layout()

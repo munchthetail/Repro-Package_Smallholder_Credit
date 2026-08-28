@@ -1,63 +1,88 @@
-#%%
 # -*- coding: utf-8 -*-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.patheffects as pe
-from numpy.polynomial import Polynomial
+from scipy.stats import gaussian_kde  # Required for manual density calculation
 from pathlib import Path
 
 #setting paths
-root     = Path(__file__).resolve().parent.parent.parent
+root       = Path(__file__).resolve().parent.parent.parent
+output_dir = root / "Tables and Figures" / "Figure_A4.pdf"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
-fig_out  = root / "Tables and Figures" / "Figure_farm_expense_by_size.pdf"
 
-#load the full sample, keep only rows with the two variables we plot
-df = pd.read_stata(dta_path)
-df = df.dropna(subset=["w_farm_size_agland", "ln_total_farm_expense","w_farm_size_agland"])
-df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
-
-xcol, ycol = "w_farm_size_agland", "ln_total_farm_expense"
-
-#wave styling (waves are coded 4 and 5 in the data)
-wave_labels = {4: "Wave 4", 5: "Wave 5"}
-wave_colors = {4: "tab:blue", 5: "tab:orange"}
-
-#grid for the fitted curves; trim the far-right tail so the view stays readable (no rows dropped)
-xmax = np.quantile(df[xcol], 0.99) * 1.05
-xg   = np.linspace(0.0, xmax, 400)
-
-#design style copied from DML Figure 2
 mpl.rcParams.update({
     "font.family": "serif",
     "font.serif": ["CMU Serif", "Computer Modern Roman", "DejaVu Serif"],
     "mathtext.fontset": "cm",
-    "axes.labelsize": 11, "font.size": 11, "legend.fontsize": 9,
-    "xtick.labelsize": 10, "ytick.labelsize": 10,
+    "axes.labelsize": 11,
+    "font.size": 11,
+    "legend.fontsize": 10,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
 })
+
 mpl.rcParams["text.usetex"] = False
 
-fig, ax = plt.subplots(figsize=(8, 6))
+#load data
+df = pd.read_stata(dta_path)
+df = df.dropna(subset=["w_farm_size_agland"])
+df = df[df.groupby("hhid")["hhid"].transform("size") == 2].copy()
 
-for w in sorted(df["wave"].unique()):
-    sub   = df[df["wave"] == w]
-    color = wave_colors.get(int(w))
-    label = wave_labels.get(int(w), f"Wave {int(w)}")
-    #raw points
-    ax.scatter(sub[xcol], sub[ycol], s=10, alpha=0.25, color=color, edgecolor="none")
-    #basic 3rd-degree (cubic) fit per wave; label the line (not the faint scatter) so it
-    #shows in the legend, with a black outline so it stands out against the points
-    p = Polynomial.fit(sub[xcol], sub[ycol], 3)
-    ax.plot(xg, p(xg), color=color, lw=2.5, label=f"{label} (n={len(sub)})",
-            path_effects=[pe.Stroke(linewidth=4.5, foreground="black"), pe.Normal()])
+fig, ax = plt.subplots(figsize=(8, 4.5))
 
-ax.set_xlim(left=0, right=xmax)
+#KDE helper function for cutting off at zero
+def plot_corrected_reflection_kde(data, ax, color, label, linestyle="-"):
+
+    #mirror the data
+    reflected_data = np.concatenate([data, -data])
+    
+    #KDE using scipy
+    kde = gaussian_kde(reflected_data, bw_method='scott') 
+    x_grid = np.linspace(0, data.max() * 1.1, 1000)
+    y_vals = kde(x_grid) * 2 
+    
+    #plot
+    ax.plot(x_grid, y_vals, color=color, label=label, linestyle=linestyle, linewidth=2)
+
+#HHs w/ informal loans
+plot_corrected_reflection_kde(
+    df.loc[df["lender_group"] == 1, "w_farm_size_agland"], 
+    ax, 
+    color="tab:blue", 
+    label="Households with Informal Loan(s)"
+)
+
+#HH w semi-formal loans
+plot_corrected_reflection_kde(
+    df.loc[df["lender_group"] == 2, "w_farm_size_agland"], 
+    ax, 
+    color="tab:orange", 
+    label="Households with Semi-Formal Loan(s)"
+)
+
+#HHs w/ formal laons
+plot_corrected_reflection_kde(
+    df.loc[df["lender_group"] == 3, "w_farm_size_agland"], 
+    ax, 
+    color="green", 
+    label="Households with Formal Loan(s)"
+)
+
+#all HHs
+plot_corrected_reflection_kde(
+    df["w_farm_size_agland"], 
+    ax, 
+    color="black", 
+    label="Full Sample", 
+    linestyle="--"
+)
+
+ax.set_xlim(left=0)
 ax.set_xlabel("Farm Size (hectares)")
-ax.set_ylabel("Log Total Farm Expenditures")
-ax.set_title("Total Farm Expenditures by Farm Size and Wave")
-ax.legend(frameon=False, loc="upper left")
+ax.set_ylabel("Density")
+ax.set_title("Kernel Density: Distribution of Farm Size by Agricultural Loan Formality")
+ax.legend(frameon=False)
 
 plt.tight_layout()
-plt.savefig(fig_out, dpi=600, bbox_inches="tight")
-print("saved ->", fig_out)
+plt.savefig(output_dir, dpi=600, bbox_inches="tight")
