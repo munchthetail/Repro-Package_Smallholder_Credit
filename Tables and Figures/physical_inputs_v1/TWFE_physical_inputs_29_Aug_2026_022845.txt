@@ -1,0 +1,18 @@
+Physical input TWFE results
+Outcome | coefficient | standard error | p-value | observations | households
+
+OUTCOME: any_hired_labor
+  loan (at mean size) | -0.039318 |  0.029719 |  0.1860 |      4320 |      2160
+  loan_x_size        |  0.000709 |  0.025571 |  0.9779 |      4320 |      2160
+
+OUTCOME: hired_person_days
+  loan (at mean size) |  1.831683 |  7.574609 |  0.8089 |      4320 |      2160
+  loan_x_size        |  5.090944 | 10.072763 |  0.6133 |      4320 |      2160
+
+OUTCOME: hired_person_days_ha
+  loan (at mean size) | -5.446864 | 25.845031 |  0.8331 |      4320 |      2160
+  loan_x_size        | -1.43e+01 | 15.909512 |  0.3675 |      4320 |      2160
+
+OUTCOME: herbicide_kg_ha
+  loan (at mean size) | -0.176393 |  0.801390 |  0.8258 |      4320 |      2160
+  loan_x_size        | -0.106381 |  0.444176 |  0.8107 |      4320 |      2160

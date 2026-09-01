@@ -1,5 +1,5 @@
 //===========================================================================
-//00_master.do — Run this file from the project root to execute full pipeline
+//00_master.do — Run this file from the project root to execute the full Stata data and table pipeline
 //===========================================================================
 
 //---------------------------------------------------------------------------

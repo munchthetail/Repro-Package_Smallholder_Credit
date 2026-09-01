@@ -54,6 +54,7 @@ dependent_variables = [
 #rescaling
 for v in dependent_variables + ["farming_loan_total_amount"]:
     df[v] = df[v] / 1000
+df["total_fert_kg_ha"] = df["total_fert_kg_ha"] * 1000
 
 #build quartiles
 df = df.copy()

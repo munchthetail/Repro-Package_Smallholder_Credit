@@ -10,6 +10,7 @@ scripts = [
     "DML Figure A2.py",
     "DML Figure A3.py",
     "DML Figure A4.py",
+    "DML Figure A5.py",
     "DML Summary Statistics.py",
     "DML Summary Statistics by Wave.py",
     "DML Summary Statistics by Quartile - Wave 4.py",

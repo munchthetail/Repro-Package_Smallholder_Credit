@@ -42,7 +42,7 @@
 		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/input_expenditure_data.dta", gen(m1)
 			drop if m1==2
 			drop m1
-	
+
 	//yearly nonfarm (total food and nonfood) expenitures
 		merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/master_gen_consumption_flag_expenditures.dta", gen(m1)
 			drop if m1==2
@@ -82,7 +82,7 @@
 				state wave hhid lender_group ///
 				probability_moderately_insecure FCS_index ///
 				internet_access phone_access farming_loan_total_amount ///
-				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha any_loan ///
+				non_farming_loan food_flag non_food_gen_consumption total_fert_kg_ha any_loan
 	
 	//remove variable labels
 	ds

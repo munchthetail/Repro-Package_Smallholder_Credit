@@ -1,5 +1,6 @@
-#data for these figures requires outout from 
-#DML Identification for total farm, total nonfarm, and fertilizer utilization to run
+#standard figures require DML Identification output with tipping_point = 0
+#for total farm, total nonfarm, and fertilizer utilization
+#Figure 4 also requires both core outcomes with tipping_point = 1
 
 import subprocess
 import sys

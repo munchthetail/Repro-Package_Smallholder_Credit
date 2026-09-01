@@ -1,0 +1,79 @@
+================================================================================
+Script: DML Identification_tipping_common  |  Version: v1  |  Started: 2026-08-29_02-29-17
+Profile: tipping_common | Data: DML Cleaned Data.dta
+================================================================================
+
+Loading data from: DML Cleaned Data.dta
+Loaded 6398 observations.
+Common tipping sample: 5476 observations (2738 households)
+
+Generating folds: K=[5], N_REP=30...
+Folds generated.
+
+Base frame: 5476 obs (2738 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+
+======================================================================
+OUTCOME: ln_gen_consumption_flag
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 5476 obs (2738 households), 0 dropped households
+   [outcome nuisance ln_gen_consumption_flag K=5] Saved to outcome_hat_ln_gen_consumption_flag_K5_R30.npy
+
+**********************************************************************
+OUTCOME: ln_gen_consumption_flag | K=5 | N_REP=30 | N=5476
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.135709  0.050284  2.698852  0.006958  0.037298  0.234264
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=0.141380  SE_adj=0.0501  [P-value=0.0047]  z=2.82
+  loan_x_size        : coef=-0.030858  SE_adj=0.0313  [P-value=0.3247]  z=-0.98
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.4120
+    Treatment R2  (D ~ X):   0.0016
+    Treatment AUC (D ~ X):   0.5754
+    Treatment AP  (D ~ X):   0.0687
+
+
+======================================================================
+OUTCOME: ln_total_farm_expense
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 5476 obs (2738 households), 0 dropped households
+   -> Reusing the existing K=5 farm outcome predictions.
+
+**********************************************************************
+OUTCOME: ln_total_farm_expense | K=5 | N_REP=30 | N=5476
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.133862  0.070778  1.891305  0.058584 -0.004897  0.272584
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=0.124747  SE_adj=0.0719  [P-value=0.0827]  z=1.74
+  loan_x_size        : coef=0.067987  SE_adj=0.0452  [P-value=0.1325]  z=1.50
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.3509
+    Treatment R2  (D ~ X):   0.0016
+    Treatment AUC (D ~ X):   0.5754
+    Treatment AP  (D ~ X):   0.0687
+
+
+======================================================================
+COMMON-SAMPLE FARM/NONFARM JOINT INFERENCE
+======================================================================
+K=5 joint coefficients [farm main, farm size, nonfarm main, nonfarm size]:
+[ 0.124747  0.067987  0.14138  -0.030858]
+
+================================================================================
+Run complete.
+================================================================================

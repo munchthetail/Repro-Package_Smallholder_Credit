@@ -11,7 +11,7 @@
 	
 	foreach v of local vars {
 		preserve
-			use "${root}/Stata Code/Stata Data Landing/w5_`v'_expenditures.dta", replace
+			use "${root}/Stata Code/Stata Data Landing/w5_`v'_expenditures.dta", clear
 			append using "${root}/Stata Code/Stata Data Landing/w4_`v'_expenditures.dta"
 			
 			save "${root}/Stata Code/Stata Data Landing/master_`v'_expenditures.dta", replace

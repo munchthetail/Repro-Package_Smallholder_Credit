@@ -1,0 +1,284 @@
+================================================================================
+Script: DML Identification_physical_inputs  |  Version: v1  |  Started: 2026-08-28_14-01-30
+Profile: physical_inputs | Data: DML Physical Input Data.dta
+================================================================================
+
+Loading data from: DML Physical Input Data.dta
+Loaded 4320 observations.
+
+Generating folds: K=[3, 5, 8], N_REP=30...
+Folds generated.
+
+Base frame: 4320 obs (2160 households)
+
+======================================================================
+STAGE 2: Loan nuisance estimation
+======================================================================
+
+======================================================================
+OUTCOME: any_hired_labor
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 4320 obs (2160 households), 0 dropped households
+   [outcome nuisance any_hired_labor K=3] Saved to outcome_hat_any_hired_labor_K3_R30.npy
+   [outcome nuisance any_hired_labor K=5] Saved to outcome_hat_any_hired_labor_K5_R30.npy
+   [outcome nuisance any_hired_labor K=8] Saved to outcome_hat_any_hired_labor_K8_R30.npy
+
+**********************************************************************
+OUTCOME: any_hired_labor | K=3 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.003137  0.023366  0.134241  0.893212 -0.042865  0.048934
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=0.004023  SE_adj=0.0239  [P-value=0.8665]  z=0.17
+  loan_x_size        : coef=-0.005668  SE_adj=0.0166  [P-value=0.7329]  z=-0.34
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.0852
+    Treatment R2  (D ~ X):   -0.0006
+    Treatment AUC (D ~ X):   0.4601
+    Treatment AP  (D ~ X):   0.0472
+
+
+**********************************************************************
+OUTCOME: any_hired_labor | K=5 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef  std err         t     P>|t|     2.5 %    97.5 %
+loan  0.002142  0.02344  0.091365  0.927202 -0.043838  0.048084
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=0.003239  SE_adj=0.0239  [P-value=0.8920]  z=0.14
+  loan_x_size        : coef=-0.005910  SE_adj=0.0166  [P-value=0.7224]  z=-0.36
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.0865
+    Treatment R2  (D ~ X):   -0.0005
+    Treatment AUC (D ~ X):   0.4804
+    Treatment AP  (D ~ X):   0.0501
+
+
+**********************************************************************
+OUTCOME: any_hired_labor | K=8 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan  0.001052  0.023407  0.044955  0.964143 -0.044967  0.046928
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=0.002048  SE_adj=0.0239  [P-value=0.9316]  z=0.09
+  loan_x_size        : coef=-0.005558  SE_adj=0.0166  [P-value=0.7382]  z=-0.33
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.0866
+    Treatment R2  (D ~ X):   -0.0004
+    Treatment AUC (D ~ X):   0.4888
+    Treatment AP  (D ~ X):   0.0513
+
+
+======================================================================
+OUTCOME: hired_person_days
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 4320 obs (2160 households), 0 dropped households
+   [outcome nuisance hired_person_days K=3] Saved to outcome_hat_hired_person_days_K3_R30.npy
+   [outcome nuisance hired_person_days K=5] Saved to outcome_hat_hired_person_days_K5_R30.npy
+   [outcome nuisance hired_person_days K=8] Saved to outcome_hat_hired_person_days_K8_R30.npy
+
+**********************************************************************
+OUTCOME: hired_person_days | K=3 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %     97.5 %
+loan  2.987537  6.158178  0.485133  0.627582 -8.989008  15.057343
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=2.184583  SE_adj=5.5844  [P-value=0.6957]  z=0.39
+  loan_x_size        : coef=6.466872  SE_adj=8.4294  [P-value=0.4430]  z=0.77
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.2011
+    Treatment R2  (D ~ X):   -0.0006
+    Treatment AUC (D ~ X):   0.4601
+    Treatment AP  (D ~ X):   0.0472
+
+
+**********************************************************************
+OUTCOME: hired_person_days | K=5 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef  std err         t     P>|t|     2.5 %     97.5 %
+loan  3.027729  6.09093  0.497088  0.619127 -8.909471  14.965733
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=2.342189  SE_adj=5.5717  [P-value=0.6742]  z=0.42
+  loan_x_size        : coef=6.505390  SE_adj=8.3493  [P-value=0.4359]  z=0.78
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.2055
+    Treatment R2  (D ~ X):   -0.0005
+    Treatment AUC (D ~ X):   0.4804
+    Treatment AP  (D ~ X):   0.0501
+
+
+**********************************************************************
+OUTCOME: hired_person_days | K=8 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|    2.5 %     97.5 %
+loan  3.071352  6.096716  0.503772  0.614422 -8.91764  15.020696
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=2.335299  SE_adj=5.5585  [P-value=0.6744]  z=0.42
+  loan_x_size        : coef=6.565646  SE_adj=8.3786  [P-value=0.4333]  z=0.78
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.2061
+    Treatment R2  (D ~ X):   -0.0004
+    Treatment AUC (D ~ X):   0.4888
+    Treatment AP  (D ~ X):   0.0513
+
+
+======================================================================
+OUTCOME: hired_person_days_ha
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 4320 obs (2160 households), 0 dropped households
+   [outcome nuisance hired_person_days_ha K=3] Saved to outcome_hat_hired_person_days_ha_K3_R30.npy
+   [outcome nuisance hired_person_days_ha K=5] Saved to outcome_hat_hired_person_days_ha_K5_R30.npy
+   [outcome nuisance hired_person_days_ha K=8] Saved to outcome_hat_hired_person_days_ha_K8_R30.npy
+
+**********************************************************************
+OUTCOME: hired_person_days_ha | K=3 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+         coef    std err         t     P>|t|      2.5 %     97.5 %
+loan  0.34494  16.099377  0.021426  0.982906 -31.444493  31.899145
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-0.807723  SE_adj=17.2155  [P-value=0.9626]  z=-0.05
+  loan_x_size        : coef=3.937058  SE_adj=9.4811  [P-value=0.6780]  z=0.42
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1689
+    Treatment R2  (D ~ X):   -0.0006
+    Treatment AUC (D ~ X):   0.4601
+    Treatment AP  (D ~ X):   0.0472
+
+
+**********************************************************************
+OUTCOME: hired_person_days_ha | K=5 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t    P>|t|      2.5 %     97.5 %
+loan -0.325906  15.97173 -0.020405  0.98372 -31.961038  30.978112
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-1.835101  SE_adj=17.0727  [P-value=0.9144]  z=-0.11
+  loan_x_size        : coef=4.512987  SE_adj=9.4069  [P-value=0.6314]  z=0.48
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1765
+    Treatment R2  (D ~ X):   -0.0005
+    Treatment AUC (D ~ X):   0.4804
+    Treatment AP  (D ~ X):   0.0501
+
+
+**********************************************************************
+OUTCOME: hired_person_days_ha | K=8 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef    std err         t     P>|t|      2.5 %     97.5 %
+loan -0.796167  15.946787 -0.049926  0.960181 -32.090129  30.458962
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-2.190465  SE_adj=16.9475  [P-value=0.8972]  z=-0.13
+  loan_x_size        : coef=4.811302  SE_adj=9.3369  [P-value=0.6063]  z=0.52
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1765
+    Treatment R2  (D ~ X):   -0.0004
+    Treatment AUC (D ~ X):   0.4888
+    Treatment AP  (D ~ X):   0.0513
+
+
+======================================================================
+OUTCOME: herbicide_kg_ha
+======================================================================
+   -> Imputing 2 variables with missing values, adding indicator flags...
+   -> 4320 obs (2160 households), 0 dropped households
+   [outcome nuisance herbicide_kg_ha K=3] Saved to outcome_hat_herbicide_kg_ha_K3_R30.npy
+   [outcome nuisance herbicide_kg_ha K=5] Saved to outcome_hat_herbicide_kg_ha_K5_R30.npy
+   [outcome nuisance herbicide_kg_ha K=8] Saved to outcome_hat_herbicide_kg_ha_K8_R30.npy
+
+**********************************************************************
+OUTCOME: herbicide_kg_ha | K=3 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan -0.008685  0.466247 -0.018627  0.985139 -0.916239  0.905142
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-0.015224  SE_adj=0.4902  [P-value=0.9752]  z=-0.03
+  loan_x_size        : coef=0.022457  SE_adj=0.2428  [P-value=0.9263]  z=0.09
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1285
+    Treatment R2  (D ~ X):   -0.0006
+    Treatment AUC (D ~ X):   0.4601
+    Treatment AP  (D ~ X):   0.0472
+
+
+**********************************************************************
+OUTCOME: herbicide_kg_ha | K=5 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan -0.006662  0.462481 -0.014405  0.988507 -0.912877  0.899785
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-0.033324  SE_adj=0.4849  [P-value=0.9452]  z=-0.07
+  loan_x_size        : coef=0.032378  SE_adj=0.2400  [P-value=0.8927]  z=0.13
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1312
+    Treatment R2  (D ~ X):   -0.0005
+    Treatment AUC (D ~ X):   0.4804
+    Treatment AP  (D ~ X):   0.0501
+
+
+**********************************************************************
+OUTCOME: herbicide_kg_ha | K=8 | N_REP=30 | N=4320
+**********************************************************************
+
+>>> DML Estimates:
+          coef   std err         t     P>|t|     2.5 %    97.5 %
+loan -0.020574  0.459135 -0.044811  0.964258 -0.921518  0.879314
+
+>>> Joint partialled-out regression (main + interaction):
+  loan (at mean size): coef=-0.047241  SE_adj=0.4845  [P-value=0.9223]  z=-0.10
+  loan_x_size        : coef=0.031423  SE_adj=0.2403  [P-value=0.8960]  z=0.13
+
+>>> Learner Performance:
+    Outcome  R2  (Y ~ X):    0.1337
+    Treatment R2  (D ~ X):   -0.0004
+    Treatment AUC (D ~ X):   0.4888
+    Treatment AP  (D ~ X):   0.0513
+
+
+================================================================================
+Run complete.
+================================================================================
