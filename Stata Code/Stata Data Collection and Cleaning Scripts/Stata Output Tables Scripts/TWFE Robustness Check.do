@@ -1,3 +1,6 @@
+//this program runs a series of TWFE regressions that are used as a benchmark throughout the paper.
+//we found it easier to export these tables to a .txt format for visual inspect rather than direct .tex output due to challenges with formating
+
 clear all      // clears data, value labels, saved results, and programs
 set more off   // prevents output from pausing with "more"
 
@@ -63,6 +66,20 @@ use "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", clear
 		}
 	end
 	
+//store extension coefficients by name
+	capture program drop store_extension_coef
+	program define store_extension_coef
+		args filehandle term label
+		local coef = _b[`term']
+		local se = _se[`term']
+		local t = `coef' / `se'
+		local p = 2 * ttail(e(df_r), abs(`t'))
+		file write `filehandle' "  `label'" _col(30) ///
+			%9.6f (`coef') "  " %9.6f (`se') "  " ///
+			%7.4f (`t') "  " %7.4f (`p') "  " ///
+			%9.6f (e(r2_a)) "  " %9.6f (e(r2_a_within)) _n
+	end
+
 //median interpolation to mimic what DML does
 	local miss_dums ""
 	
@@ -380,6 +397,154 @@ file write outfile "============================================================
 			restore
 			}
 	
+//post planting extension
+	//baseline
+		scalar def baseline = 0
+
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+
+				reghdfe `v' ext_any_pp centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index non_farming_loan ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid)
+
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | TREATMENT: ext_any_pp | MODEL: Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_extension_coef outfile ext_any_pp "extension"
+
+			restore
+			}
+
+	//farm size interactions
+		scalar def baseline = 1
+
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+
+				reghdfe `v' ext_any_pp##c.centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index non_farming_loan ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid)
+
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | TREATMENT: ext_any_pp | MODEL: Heterogeneous Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_extension_coef outfile 1.ext_any_pp "extension (at mean size)"
+				store_extension_coef outfile 1.ext_any_pp#c.centered_w_farm_size_agland "extension_x_size"
+
+			restore
+			}
+
+//either visit extension
+	//baseline
+		scalar def baseline = 0
+
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+
+				reghdfe `v' ext_any_either centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index non_farming_loan ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid)
+
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | TREATMENT: ext_any_either | MODEL: Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_extension_coef outfile ext_any_either "extension"
+
+			restore
+			}
+
+	//farm size interactions
+		scalar def baseline = 1
+
+		foreach v of varlist ln_gen_consumption_flag ln_total_farm_expense{
+			preserve
+
+				drop if `v'== .
+				duplicates tag hhid, gen(tag)
+				drop if tag==0
+				drop tag
+
+				quiet sum w_farm_size_agland, detail
+				gen centered_w_farm_size_agland = w_farm_size_agland - `r(mean)'
+
+				reghdfe `v' ext_any_either##c.centered_w_farm_size_agland ///
+					w_value_crop_production w_value_assets w_nonfarm_income ///
+					w_lvstck_holding_tlu ag_plot_formal_rights_hh ///
+					income_shock food_shock price_shock ///
+					head_maritial_status head_age head_sex ///
+					member adult_member ///
+					phone_access internet_access ///
+					probability_moderately_insecure FCS_index non_farming_loan ///
+					`miss_dums' i.state, ///
+					absorb(hhid wave) vce(cluster hhid)
+
+				file write outfile _n "======================================================================" _n
+				file write outfile "OUTCOME: `v' | TREATMENT: ext_any_either | MODEL: Heterogeneous Baseline TWFE" _n
+				file write outfile "  N = `e(N)' | Clusters = `e(N_clust)'" _n
+				file write outfile "======================================================================" _n
+				file write outfile "  " _col(30) "coef       std err     t       P>|t|     adj-R2       within-adj-R2" _n
+				file write outfile "**********************************************************************" _n
+				store_extension_coef outfile 1.ext_any_either "extension (at mean size)"
+				store_extension_coef outfile 1.ext_any_either#c.centered_w_farm_size_agland "extension_x_size"
+
+			restore
+			}
+
 	file close outfile
 	display "Coefficients written to TWFE_coefficients.txt"
 

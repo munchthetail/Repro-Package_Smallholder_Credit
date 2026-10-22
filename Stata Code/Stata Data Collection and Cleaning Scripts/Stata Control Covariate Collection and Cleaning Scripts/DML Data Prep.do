@@ -118,5 +118,24 @@
 		replace ln_`v' = log(`v') //if `v' > 0
 	}
 	
+	//Add alternative extension treatments after the existing sample/outcome construction.
+	//Keep the credit-analysis sample.
+	preserve
+		do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Extension Treatments.do"
+	restore
+	local rows_before_extension = _N
+	merge 1:1 hhid wave using "${root}/Stata Code/Stata Data Landing/extension_treatments.dta", ///
+		keep(master match) nogen
+	assert _N == `rows_before_extension'
+	isid hhid wave
+	//Match the existing numeric, unlabelled DML export convention.
+	foreach v in ext_any_either ext_any_pp {
+		//Count missing extension responses as untreated.
+		replace `v' = 0 if missing(`v')
+		label values `v'
+		label variable `v' ""
+	}
+	capture label drop extension_receipt
+
 	//exporting for R
 	save "${root}/Stata Code/Stata Data Landing/DML Cleaned Data.dta", replace

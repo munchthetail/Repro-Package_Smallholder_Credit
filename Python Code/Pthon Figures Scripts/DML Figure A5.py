@@ -28,7 +28,7 @@ wave_colors = {4: "tab:blue", 5: "tab:orange"}
 xmax = np.quantile(df[xcol], 0.99) * 1.05
 xg   = np.linspace(0.0, xmax, 400)
 
-#design style copied from DML Figure 2
+#design style copied from DML Figure A7
 mpl.rcParams.update({
     "font.family": "serif",
     "font.serif": ["CMU Serif", "Computer Modern Roman", "DejaVu Serif"],
