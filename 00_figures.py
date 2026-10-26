@@ -6,6 +6,7 @@ root        = Path(__file__).resolve().parent
 figures_dir = root / "Python Code" / "Pthon Figures Scripts"
 
 scripts = [
+    "DML Figure 4.py",
     "DML Figure A1.py",
     "DML Figure A2.py",
     "DML Figure A3.py",

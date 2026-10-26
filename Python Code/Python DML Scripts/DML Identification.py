@@ -17,6 +17,13 @@
 #      or True to force re-fitting from scratch.
 #   4. Choose if you would like heterogenous treatment effect (HTE=True) 
 #      or if you would like quartile analysis HTE_GATE=True
+# For extension tests, set d_col to "ext_any_either" or "ext_any_pp" below.
+# Set K=5 and N_REP below; use re_estimate_nuisance=True to replace the test cache.
+#Planned extension setting (not active in this script yet):
+#For extension checks, disable internal CV in the treatment stack only.
+#Fit the base learners and combining model within each outer training fold.
+#Keep the base learner settings and outer household cross-fitting unchanged.
+#TODO: Revise these comments and the robustness subsection before finalizing.
 #
 # PIPELINE STAGES:
 #   Stage 1 — Generate master household-level folds (shared across all outcomes)
@@ -119,7 +126,7 @@ print("=" * 80, flush=True)
 k_fold_vector = [5]
 
 #number of repetitions NOTE: paper results use N_REP=30; start with 5 for runtime checks
-N_REP = 30
+N_REP = 5
 
 #parallel workers, in general the speed of the analysis should grow roughly 
 #linearly with the number of works for large rep runs
@@ -127,19 +134,25 @@ N_WORKERS = 6
 
 #set True to re-fit all nuisance functions from scratch even if cache files exist (add a lot of time)
 #tipping caches are not validated, so use True after changing the data, folds, or outcomes
-re_estimate_nuisance = False
+re_estimate_nuisance = True
 
 #set as True if you want to calculate HTEs
-HTE = True
+HTE = False
 
 #for the group average treatment effects (GATE), this is another way of estimating HTE, set GATE=True
 #NOTE: it is not neccessary, but should be mutually exclusive with the general HTE flag 
-HTE_GATE = True
+HTE_GATE = False
 if tipping_point == 1:
     HTE_GATE = False
 
 #these are used throughout the script: treatment, time, and unit column names
+
+# ============================================================
+#NOTE: change the treatment to "ext_any_either" or "ext_any_pp" for extension robustness checks 
+# ============================================================
+
 d_col, time_col, unit_col = "any_arv_farm_loan", "wave", "hhid"
+print(f"Treatment: {d_col} | K={k_fold_vector} | N_REP={N_REP} | Refit={re_estimate_nuisance}", flush=True)
 
 # ============================================================
 # OUTCOME VECTORS
@@ -198,6 +211,8 @@ clf = make_ml_m_loan_clf(n_core=len(explicit_x))
 print(f"\nLoading data from: {dta_path.name}")
 farm_exp_data = pd.read_stata(dta_path)
 print(f"Loaded {len(farm_exp_data)} observations.", flush=True)
+#drop missing treatment values before making folds
+farm_exp_data = farm_exp_data.dropna(subset=[d_col]).copy()
 fold_source = farm_exp_data[[unit_col, time_col, d_col]].copy()
 
 #use the same complete two-wave sample for both tipping point outcomes
@@ -473,6 +488,9 @@ for y_col in outcome_vars:
         #prints OLS output into the log
         print("\n>>> DML Estimates:")
         print(plr.summary)
+        #show each repetition to check how much the estimates change
+        print("    Coefficients by repetition:", np.array2string(plr.all_coef[0], precision=6))
+        print("    Standard errors by repetition:", np.array2string(plr.all_se[0], precision=6))
 
         # ---- OUTPUT: HETEROGENEOUS TREATMENT EFFECTS ----
         #we can't do this exactly with the canned functions because of how we set up catching
@@ -601,6 +619,8 @@ for y_col in outcome_vars:
         #AUC/AP
         print(f"    Treatment AUC (D ~ X):   {roc_auc_score(d_true, d_pred_avg):.4f}")
         print(f"    Treatment AP  (D ~ X):   {average_precision_score(d_true, d_pred_avg):.4f}")
+        print("    Treatment AUC by repetition:",
+              [round(roc_auc_score(d_true, loan_hat_aligned[:, r]), 4) for r in range(N_REP)])
     
         print(flush=True)
 
