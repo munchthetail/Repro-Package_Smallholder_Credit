@@ -69,8 +69,10 @@ from nuisance_function_residual_est import estimate_loan_nuisance, estimate_outc
 from learners import make_ml_m_loan_clf
 
 # ============================================================
-# TIPPING POINT SETTING
+# TIPPING POINT SETTING --- IMPORTANT!!!
 # ============================================================
+#NOTE: We **heavily** suggest running all the other analyses you are interested in prior to running the tipping point analysis. If you want to produce any results besides the Figure 2, then this setting should be set to "tipping_point = 0"
+#NOTE: the tipping point analysis is a special case of the DML estimation where we standardize the sample between farm and nonfarm outcomes to the same set of households. This is NOT how the core analysis is performed. Additionally due to the construction of this script the tipping point analysis and the Group Average Treatment Effect (GATE, aka quartile analysis) in the same run.
 tipping_point = 0  #set to 1 to estimate farm and nonfarm effects on the same balanced sample
 
 # ============================================================
@@ -97,6 +99,7 @@ cache_dir = Path(cache_dir)
 
 #there is a pretty large automatic logging setup
 #auto-increment version number so each run creates a new file
+#NOTE: this is basically superfluous due to the timestamp, but is here just incase
 #tables are formatted in .txt files in the output directory
 pattern = re.compile(rf"{re.escape(script_name)}_v(\d+)(?:_.*)?\.txt$")
 existing_versions = []
@@ -137,6 +140,7 @@ N_WORKERS = 6
 re_estimate_nuisance = True
 
 #set as True if you want to calculate HTEs
+#NOTE: to run the tipping point analysis, you must set HTE=True and tipping_point=1 (above)
 HTE = False
 
 #for the group average treatment effects (GATE), this is another way of estimating HTE, set GATE=True

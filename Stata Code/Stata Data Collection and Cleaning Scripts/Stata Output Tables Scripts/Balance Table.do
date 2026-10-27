@@ -20,4 +20,4 @@
     vce(robust) ///
     rowvarlabels ///
     format(%9.3f) ///
-    savetex("${root}/Tables and Figures/balance_table.tex") replace
+    savetex("${root}/Tables and Figures/Table_A1_balance_table.tex") replace

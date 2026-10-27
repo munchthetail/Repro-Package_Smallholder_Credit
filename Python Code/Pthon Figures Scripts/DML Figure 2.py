@@ -148,7 +148,7 @@ ax2.set_xlim(left=0, right=xmax)
  
 plt.tight_layout()
 #save separately so the existing paper figure is untouched until the results are reviewed
-fig_out = root / "Tables and Figures" / "tipping_common" / "Figure_tipping_point_common_sample.pdf"
+fig_out = root / "Tables and Figures" / "tipping_common" / "Figure_2_tipping_point_common_sample.pdf"
 fig_out.parent.mkdir(parents=True, exist_ok=True)
 plt.savefig(fig_out, dpi=600, bbox_inches="tight")
 print("saved ->", fig_out)

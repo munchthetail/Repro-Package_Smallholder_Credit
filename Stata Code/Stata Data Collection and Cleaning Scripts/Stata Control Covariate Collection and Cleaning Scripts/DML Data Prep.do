@@ -1,6 +1,6 @@
-// This file collects all data sources for the analysis and does a few last data cleaning steps prior to DML processing.
-	clear all      // clears data, value labels, saved results, and programs
-	set more off   // prevents output from pausing with "more"
+//This file collects all data sources for the analysis and does a few last data cleaning steps prior to DML processing
+	clear all      //clears data, value labels, saved results, and programs
+	set more off   //prevents output from pausing with "more"
 	
 	//general data
 		use "${root}/Stata Code/Stata Data Landing/cleaned_general_data.dta", clear
@@ -118,8 +118,8 @@
 		replace ln_`v' = log(`v') //if `v' > 0
 	}
 	
-	//Add alternative extension treatments after the existing sample/outcome construction.
-	//Keep the credit-analysis sample.
+	//add alternative extension treatments
+	//keep the credit-analysis
 	preserve
 		do "${base}/Stata Control Covariate Collection and Cleaning Scripts/Extension Treatments.do"
 	restore
@@ -128,9 +128,9 @@
 		keep(master match) nogen
 	assert _N == `rows_before_extension'
 	isid hhid wave
-	//Match the existing numeric, unlabelled DML export convention.
+	//match the DML export format
 	foreach v in ext_any_either ext_any_pp {
-		//Count missing extension responses as untreated.
+		//count missing extension responses as untreated.
 		replace `v' = 0 if missing(`v')
 		label values `v'
 		label variable `v' ""

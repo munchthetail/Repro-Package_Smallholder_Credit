@@ -4,7 +4,7 @@ from pathlib import Path
 
 #setting paths
 root       = Path(__file__).resolve().parent.parent.parent
-output_dir = root / "Tables and Figures" / "quartile_summary_quartile_w4.csv"
+output_dir = root / "Tables and Figures" / "Table_A4_quartile_summary_quartile_w4.csv"
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 
 #load data

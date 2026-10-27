@@ -11,7 +11,7 @@ from pathlib import Path
 #setting paths
 root     = Path(__file__).resolve().parent.parent.parent
 dta_path = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
-fig_out  = root / "Tables and Figures" / "Figure_farm_expense_by_size.pdf"
+fig_out  = root / "Tables and Figures" / "Figure_A5_farm_expense_by_size.pdf"
 
 #load the full sample, keep only rows with the two variables we plot
 df = pd.read_stata(dta_path)

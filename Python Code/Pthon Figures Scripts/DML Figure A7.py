@@ -13,7 +13,7 @@ root      = Path(__file__).resolve().parent.parent.parent
 cache_dir = root / "Tables and Figures" / "nuisance_cache"
 dta_path  = root / "Stata Code" / "Stata Data Landing" / "DML Cleaned Data.dta"
 twfe_path = root / "Stata Code" / "Stata Data Landing" / "TWFE_farm_residuals.dta"
-fig_out   = root / "Tables and Figures" / "Figure_residual_farm_variance_DML_vs_TWFE.pdf"
+fig_out   = root / "Tables and Figures" / "Figure_A7_residual_farm_variance_DML_vs_TWFE.pdf"
 
 #load  data
 dml  = pd.read_csv(cache_dir / "DML_farm_residuals.csv")

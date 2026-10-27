@@ -9,7 +9,7 @@ from pathlib import Path
 #setting paths
 root     = Path(__file__).resolve().parent.parent.parent
 dta_path = root / "Stata Code" / "Stata Data Landing" / "Pie Chart Data.dta"
-fig_out  = root / "Tables and Figures" / "Figure_loan_composition_by_reason.pdf"
+fig_out  = root / "Tables and Figures" / "Figure_4_loan_composition_by_reason.pdf"
 
 #load data, keep only households that actually took out a loan
 df = pd.read_stata(dta_path, convert_categoricals=False)
